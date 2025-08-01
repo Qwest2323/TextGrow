@@ -314,7 +314,7 @@ async def delete_shortcut(shortcut_id: str, user_id: str = Depends(get_current_u
 async def get_folders(user_id: str = Depends(get_current_user)):
     """Get all folders for the current user"""
     try:
-        result = supabase_client.table('text_grow.folders').select('*').eq('user_id', user_id).execute()
+        result = supabase_client.table('folders').select('*').eq('user_id', user_id).execute()
         
         folders = []
         for folder in result.data:
