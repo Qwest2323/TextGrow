@@ -124,7 +124,7 @@ const Dashboard = ({ session }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch tags');
+        throw new Error(`Failed to fetch tags: ${response.status}`);
       }
 
       const data = await response.json();
