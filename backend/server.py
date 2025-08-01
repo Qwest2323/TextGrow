@@ -471,15 +471,15 @@ async def delete_tag(tag_id: str):
     """Delete a tag"""
     try:
         # Check if tag exists
-        existing = supabase_client.table('tags').select('*').eq('id', tag_id).single().execute()
+        existing = supabase_client.table('text_grow.tags').select('*').eq('id', tag_id).single().execute()
         if not existing.data:
             raise HTTPException(status_code=404, detail="Tag not found")
         
         # Delete tag assignments
-        supabase_client.table('shortcut_tag_assignments').delete().eq('tag_id', tag_id).execute()
+        supabase_client.table('text_grow.shortcut_tag_assignments').delete().eq('tag_id', tag_id).execute()
         
         # Delete tag
-        supabase_client.table('tags').delete().eq('id', tag_id).execute()
+        supabase_client.table('text_grow.tags').delete().eq('id', tag_id).execute()
         
         return {"message": "Tag deleted successfully"}
     except Exception as e:
