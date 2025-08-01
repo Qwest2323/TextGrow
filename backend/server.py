@@ -492,7 +492,7 @@ async def export_shortcuts(user_id: str = Depends(get_current_user)):
     try:
         # Get all user data
         shortcuts_result = supabase_client.table('text_grow.shortcuts').select('*').eq('user_id', user_id).execute()
-        folders_result = supabase_client.table('folders').select('*').eq('user_id', user_id).execute()
+        folders_result = supabase_client.table('text_grow.folders').select('*').eq('user_id', user_id).execute()
         
         export_data = {
             'version': '1.0',
