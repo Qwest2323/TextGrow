@@ -22,6 +22,94 @@ class TextGrowAPITester:
         self.supabase_client = None
         self.auth_token = None
 
+    def setup_authentication(self):
+        """Setup Supabase authentication for testing"""
+        try:
+            # Get Supabase credentials from environment
+            supabase_url = "https://lkpdmllkksgybuwipkjf.supabase.co"
+            supabase_anon_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxrcGRtbGxra3NneWJ1d2lwa2pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MDk4NjcsImV4cCI6MjA2MzE4NTg2N30.1mny2GnXzwSKmLm_LLP7-7Gnq16UYhl5ayTugULhLKs"
+            
+            self.supabase_client = create_client(supabase_url, supabase_anon_key)
+            
+            # Create a test user or sign in with existing test user
+            test_email = "test@textgrow.com"
+            test_password = "testpassword123"
+            
+            print(f"🔐 Setting up authentication for {test_email}...")
+            
+            # Try to sign in first
+            try:
+                auth_response = self.supabase_client.auth.sign_in_with_password({
+                    "email": test_email,
+                    "password": test_password
+                })
+                print("✅ Signed in with existing test user")
+            except Exception as signin_error:
+                print(f"⚠️  Sign in failed, trying to create user: {signin_error}")
+                # If sign in fails, try to create the user
+                try:
+                    auth_response = self.supabase_client.auth.sign_up({
+                        "email": test_email,
+                        "password": test_password,
+                        "options": {
+                            "data": {
+                                "name": "Test User"
+                            }
+                        }
+                    })
+                    print("✅ Created new test user")
+                except Exception as signup_error:
+                    print(f"❌ Failed to create user: {signup_error}")
+                    return False
+            
+            # Get the access token
+            if auth_response.session and auth_response.session.access_token:
+                self.auth_token = auth_response.session.access_token
+                self.headers['Authorization'] = f'Bearer {self.auth_token}'
+                print(f"✅ Authentication token obtained: {self.auth_token[:20]}...")
+                return True
+            else:
+                print("❌ No access token received")
+                return False
+                
+        except Exception as e:
+            print(f"❌ Authentication setup failed: {str(e)}")
+            return False
+
+    def test_authentication_flow(self):
+        """Test the JWT token validation specifically"""
+        print("\n" + "="*50)
+        print("TESTING JWT TOKEN VALIDATION")
+        print("="*50)
+        
+        # Test with valid token
+        success, response = self.run_test(
+            "JWT Token Validation (Valid Token)",
+            "GET",
+            "auth/me",
+            200,
+            check_response=lambda r: 'id' in r and 'email' in r
+        )
+        
+        if not success:
+            return False
+        
+        # Test with invalid token
+        original_auth = self.headers['Authorization']
+        self.headers['Authorization'] = 'Bearer invalid-token-12345'
+        
+        success_invalid, _ = self.run_test(
+            "JWT Token Validation (Invalid Token)",
+            "GET",
+            "auth/me",
+            401  # Should return 401 for invalid token
+        )
+        
+        # Restore valid token
+        self.headers['Authorization'] = original_auth
+        
+        return success and success_invalid
+
     def run_test(self, name, method, endpoint, expected_status, data=None, check_response=None):
         """Run a single API test"""
         url = f"{self.base_url}/{endpoint}"
@@ -127,8 +215,8 @@ class TextGrowAPITester:
         
         # Test create shortcut
         shortcut_data = {
-            "trigger": "@test",
-            "content": "This is a test shortcut content"
+            "trigger": "@email",
+            "content": "john.doe@textgrow.com"
         }
         
         success, created_shortcut = self.run_test(
@@ -137,7 +225,7 @@ class TextGrowAPITester:
             "shortcuts",
             200,
             data=shortcut_data,
-            check_response=lambda r: 'id' in r and r['trigger'] == '@test'
+            check_response=lambda r: 'id' in r and r['trigger'] == '@email'
         )
         
         if not success:
@@ -162,8 +250,8 @@ class TextGrowAPITester:
         # Test update shortcut
         if shortcut_id:
             update_data = {
-                "trigger": "@updated",
-                "content": "Updated content"
+                "trigger": "@work-email",
+                "content": "john.doe@company.com"
             }
             
             success, updated_shortcut = self.run_test(
@@ -172,7 +260,7 @@ class TextGrowAPITester:
                 f"shortcuts/{shortcut_id}",
                 200,
                 data=update_data,
-                check_response=lambda r: r.get('trigger') == '@updated'
+                check_response=lambda r: r.get('trigger') == '@work-email'
             )
             
             if not success:
@@ -182,7 +270,7 @@ class TextGrowAPITester:
         success, search_results = self.run_test(
             "Search Shortcuts",
             "GET",
-            "search?q=updated",
+            "search?q=work-email",
             200,
             check_response=lambda r: isinstance(r, list)
         )
@@ -209,7 +297,7 @@ class TextGrowAPITester:
         
         # Test create folder
         folder_data = {
-            "name": "Test Folder"
+            "name": "Work Templates"
         }
         
         success, created_folder = self.run_test(
@@ -218,7 +306,7 @@ class TextGrowAPITester:
             "folders",
             200,
             data=folder_data,
-            check_response=lambda r: 'id' in r and r['name'] == 'Test Folder'
+            check_response=lambda r: 'id' in r and r['name'] == 'Work Templates'
         )
         
         if not success:
@@ -243,7 +331,7 @@ class TextGrowAPITester:
         # Test update folder
         if folder_id:
             update_data = {
-                "name": "Updated Folder"
+                "name": "Business Templates"
             }
             
             success, updated_folder = self.run_test(
@@ -252,7 +340,7 @@ class TextGrowAPITester:
                 f"folders/{folder_id}",
                 200,
                 data=update_data,
-                check_response=lambda r: r.get('name') == 'Updated Folder'
+                check_response=lambda r: r.get('name') == 'Business Templates'
             )
             
             if not success:
@@ -266,7 +354,7 @@ class TextGrowAPITester:
         print("TESTING TAG ENDPOINTS")
         print("="*50)
         
-        # Test get tags (initially empty)
+        # Test get tags (initially empty) - Note: tags endpoint doesn't require auth
         success, tags = self.run_test(
             "Get Tags (Empty)",
             "GET",
@@ -278,9 +366,9 @@ class TextGrowAPITester:
         if not success:
             return False
         
-        # Test create tag
+        # Test create tag - Note: tags endpoint doesn't require auth
         tag_data = {
-            "name": "test-tag"
+            "name": "productivity"
         }
         
         success, created_tag = self.run_test(
@@ -289,7 +377,7 @@ class TextGrowAPITester:
             "tags",
             200,
             data=tag_data,
-            check_response=lambda r: 'id' in r and r['name'] == 'test-tag'
+            check_response=lambda r: 'id' in r and r['name'] == 'productivity'
         )
         
         if not success:
@@ -314,7 +402,7 @@ class TextGrowAPITester:
         # Test update tag
         if tag_id:
             update_data = {
-                "name": "updated-tag"
+                "name": "efficiency"
             }
             
             success, updated_tag = self.run_test(
@@ -323,7 +411,7 @@ class TextGrowAPITester:
                 f"tags/{tag_id}",
                 200,
                 data=update_data,
-                check_response=lambda r: r.get('name') == 'updated-tag'
+                check_response=lambda r: r.get('name') == 'efficiency'
             )
             
             if not success:
@@ -400,10 +488,20 @@ class TextGrowAPITester:
         print(f"Base URL: {self.base_url}")
         print(f"Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
+        # Setup authentication first
+        if not self.setup_authentication():
+            print("❌ Authentication setup failed - stopping tests")
+            return False
+        
         try:
             # Test health endpoints first
             if not self.test_health_endpoints():
                 print("❌ Health check failed - stopping tests")
+                return False
+            
+            # Test JWT token validation specifically
+            if not self.test_authentication_flow():
+                print("❌ JWT token validation failed - stopping tests")
                 return False
             
             # Test auth endpoints
