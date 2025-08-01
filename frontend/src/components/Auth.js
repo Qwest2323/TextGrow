@@ -178,14 +178,6 @@ const Auth = () => {
               </svg>
               Continue with Google
             </button>
-            
-            <button
-              onClick={() => handleOAuthLogin('github')}
-              className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
-            >
-              <Github className="w-5 h-5 mr-2" />
-              Continue with GitHub
-            </button>
           </div>
         </div>
 
