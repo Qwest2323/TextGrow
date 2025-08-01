@@ -83,14 +83,18 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 // Sync shortcuts with server
 async function syncShortcuts() {
   try {
+    console.log('=== SYNC SHORTCUTS DEBUG ===');
     console.log('Syncing shortcuts with server...');
     
     const { [STORAGE_KEYS.USER_TOKEN]: userToken } = await chrome.storage.local.get(STORAGE_KEYS.USER_TOKEN);
+    console.log('User token found:', userToken ? `${userToken.substring(0, 20)}...` : 'NONE');
     
     if (!userToken) {
       console.log('No user token found, skipping sync');
       return;
     }
+    
+    console.log('Making API call to:', `${API_BASE_URL}/shortcuts`);
     
     // Fetch shortcuts from server
     const response = await fetch(`${API_BASE_URL}/shortcuts`, {
@@ -100,8 +104,17 @@ async function syncShortcuts() {
       }
     });
     
+    console.log('API Response status:', response.status);
+    console.log('API Response ok:', response.ok);
+    
     if (response.ok) {
       const shortcuts = await response.json();
+      console.log('Received shortcuts from API:', shortcuts);
+      console.log('Number of shortcuts:', shortcuts.length);
+      
+      if (shortcuts.length > 0) {
+        console.log('First shortcut:', shortcuts[0]);
+      }
       
       // Store shortcuts locally
       await chrome.storage.local.set({
@@ -109,15 +122,25 @@ async function syncShortcuts() {
         [STORAGE_KEYS.LAST_SYNC]: Date.now()
       });
       
-      console.log(`Synced ${shortcuts.length} shortcuts`);
+      console.log(`✅ Synced ${shortcuts.length} shortcuts successfully`);
       
       // Notify content scripts about update
       notifyContentScripts('shortcuts-updated', shortcuts);
     } else {
-      console.error('Failed to sync shortcuts:', response.status);
+      console.error('❌ Failed to sync shortcuts. Status:', response.status);
+      
+      // Try to get error details
+      try {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+      } catch (e) {
+        console.error('Could not read error response');
+      }
     }
   } catch (error) {
-    console.error('Error syncing shortcuts:', error);
+    console.error('❌ Error syncing shortcuts:', error);
+    console.error('Error details:', error.message);
+    console.error('Error stack:', error.stack);
   }
 }
 
