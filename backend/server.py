@@ -163,7 +163,7 @@ async def signup(user_data: UserCreate):
     """Create a new user account"""
     try:
         # Check if user already exists
-        existing_user = supabase_client.table('text_grow.users').select('*').eq('email', user_data.email).execute()
+        existing_user = supabase_client.table('users').select('*').eq('email', user_data.email).execute()
         if existing_user.data:
             raise HTTPException(status_code=400, detail="User already exists")
         
@@ -181,7 +181,7 @@ async def signup(user_data: UserCreate):
             'updated_at': now.isoformat()
         }
         
-        result = supabase_client.table('text_grow.users').insert(new_user).execute()
+        result = supabase_client.table('users').insert(new_user).execute()
         return {"message": "User created successfully", "user_id": user_id}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -190,7 +190,7 @@ async def signup(user_data: UserCreate):
 async def get_current_user_profile(user_id: str = Depends(get_current_user)):
     """Get current user profile"""
     try:
-        result = supabase_client.table('text_grow.users').select('*').eq('id', user_id).single().execute()
+        result = supabase_client.table('users').select('*').eq('id', user_id).single().execute()
         if not result.data:
             raise HTTPException(status_code=404, detail="User not found")
         
@@ -213,7 +213,7 @@ async def get_shortcuts(user_id: str = Depends(get_current_user)):
     """Get all shortcuts for the current user with folder and tag details"""
     try:
         # Get shortcuts
-        shortcuts_result = supabase_client.table('text_grow.shortcuts').select('*').eq('user_id', user_id).execute()
+        shortcuts_result = supabase_client.table('shortcuts').select('*').eq('user_id', user_id).execute()
         
         shortcuts_with_details = []
         for shortcut in shortcuts_result.data:
@@ -245,7 +245,7 @@ async def create_shortcut(shortcut_data: ShortcutCreate, user_id: str = Depends(
     """Create a new shortcut"""
     try:
         # Check shortcut limit (500 per user)
-        count_result = supabase_client.table('text_grow.shortcuts').select('id', count='exact').eq('user_id', user_id).execute()
+        count_result = supabase_client.table('shortcuts').select('id', count='exact').eq('user_id', user_id).execute()
         if count_result.count and count_result.count >= 500:
             raise HTTPException(status_code=400, detail="Maximum shortcut limit (500) reached")
         
@@ -261,7 +261,7 @@ async def create_shortcut(shortcut_data: ShortcutCreate, user_id: str = Depends(
             'updated_at': now.isoformat()
         }
         
-        result = supabase_client.table('text_grow.shortcuts').insert(new_shortcut).execute()
+        result = supabase_client.table('shortcuts').insert(new_shortcut).execute()
         
         return Shortcut(
             id=shortcut_id,
@@ -279,7 +279,7 @@ async def update_shortcut(shortcut_id: str, shortcut_data: ShortcutUpdate, user_
     """Update a shortcut"""
     try:
         # Verify ownership
-        existing = supabase_client.table('text_grow.shortcuts').select('*').eq('id', shortcut_id).eq('user_id', user_id).single().execute()
+        existing = supabase_client.table('shortcuts').select('*').eq('id', shortcut_id).eq('user_id', user_id).single().execute()
         if not existing.data:
             raise HTTPException(status_code=404, detail="Shortcut not found")
         
@@ -292,7 +292,7 @@ async def update_shortcut(shortcut_id: str, shortcut_data: ShortcutUpdate, user_
         if shortcut_data.content is not None:
             update_data['content'] = shortcut_data.content
         
-        result = supabase_client.table('text_grow.shortcuts').update(update_data).eq('id', shortcut_id).execute()
+        result = supabase_client.table('shortcuts').update(update_data).eq('id', shortcut_id).execute()
         
         updated_shortcut = result.data[0]
         return Shortcut(
@@ -311,16 +311,16 @@ async def delete_shortcut(shortcut_id: str, user_id: str = Depends(get_current_u
     """Delete a shortcut"""
     try:
         # Verify ownership
-        existing = supabase_client.table('text_grow.shortcuts').select('*').eq('id', shortcut_id).eq('user_id', user_id).single().execute()
+        existing = supabase_client.table('shortcuts').select('*').eq('id', shortcut_id).eq('user_id', user_id).single().execute()
         if not existing.data:
             raise HTTPException(status_code=404, detail="Shortcut not found")
         
         # Delete associations first
-        supabase_client.table('text_grow.shortcut_tag_assignments').delete().eq('shortcut_id', shortcut_id).execute()
-        supabase_client.table('text_grow.folder_shortcuts').delete().eq('shortcut_id', shortcut_id).execute()
+        supabase_client.table('shortcut_tag_assignments').delete().eq('shortcut_id', shortcut_id).execute()
+        supabase_client.table('folder_shortcuts').delete().eq('shortcut_id', shortcut_id).execute()
         
         # Delete shortcut
-        supabase_client.table('text_grow.shortcuts').delete().eq('id', shortcut_id).execute()
+        supabase_client.table('shortcuts').delete().eq('id', shortcut_id).execute()
         
         return {"message": "Shortcut deleted successfully"}
     except Exception as e:
@@ -331,7 +331,7 @@ async def delete_shortcut(shortcut_id: str, user_id: str = Depends(get_current_u
 async def get_folders(user_id: str = Depends(get_current_user)):
     """Get all folders for the current user"""
     try:
-        result = supabase_client.table('text_grow.folders').select('*').eq('user_id', user_id).execute()
+        result = supabase_client.table('folders').select('*').eq('user_id', user_id).execute()
         
         folders = []
         for folder in result.data:
@@ -352,7 +352,7 @@ async def update_folder(folder_id: str, folder_data: FolderUpdate, user_id: str 
     """Update a folder"""
     try:
         # Verify ownership
-        existing = supabase_client.table('text_grow.folders').select('*').eq('id', folder_id).eq('user_id', user_id).single().execute()
+        existing = supabase_client.table('folders').select('*').eq('id', folder_id).eq('user_id', user_id).single().execute()
         if not existing.data:
             raise HTTPException(status_code=404, detail="Folder not found")
         
@@ -361,7 +361,7 @@ async def update_folder(folder_id: str, folder_data: FolderUpdate, user_id: str 
             'updated_at': datetime.utcnow().isoformat()
         }
         
-        result = supabase_client.table('text_grow.folders').update(update_data).eq('id', folder_id).execute()
+        result = supabase_client.table('folders').update(update_data).eq('id', folder_id).execute()
         
         updated_folder = result.data[0]
         return Folder(
@@ -379,15 +379,15 @@ async def delete_folder(folder_id: str, user_id: str = Depends(get_current_user)
     """Delete a folder"""
     try:
         # Verify ownership
-        existing = supabase_client.table('text_grow.folders').select('*').eq('id', folder_id).eq('user_id', user_id).single().execute()
+        existing = supabase_client.table('folders').select('*').eq('id', folder_id).eq('user_id', user_id).single().execute()
         if not existing.data:
             raise HTTPException(status_code=404, detail="Folder not found")
         
         # Delete folder shortcuts associations
-        supabase_client.table('text_grow.folder_shortcuts').delete().eq('folder_id', folder_id).execute()
+        supabase_client.table('folder_shortcuts').delete().eq('folder_id', folder_id).execute()
         
         # Delete folder  
-        supabase_client.table('text_grow.folders').delete().eq('id', folder_id).execute()
+        supabase_client.table('folders').delete().eq('id', folder_id).execute()
         
         return {"message": "Folder deleted successfully"}
     except Exception as e:
@@ -408,7 +408,7 @@ async def create_folder(folder_data: FolderCreate, user_id: str = Depends(get_cu
             'updated_at': now.isoformat()
         }
         
-        result = supabase_client.table('text_grow.folders').insert(new_folder).execute()
+        result = supabase_client.table('folders').insert(new_folder).execute()
         
         return Folder(
             id=folder_id,
@@ -425,7 +425,7 @@ async def create_folder(folder_data: FolderCreate, user_id: str = Depends(get_cu
 async def get_tags():
     """Get all available tags"""
     try:
-        result = supabase_client.table('text_grow.tags').select('*').execute()
+        result = supabase_client.table('tags').select('*').execute()
         
         tags = []
         for tag in result.data:
@@ -445,7 +445,7 @@ async def update_tag(tag_id: str, tag_data: TagCreate):
     """Update a tag"""
     try:
         # Check if tag exists
-        existing = supabase_client.table('text_grow.tags').select('*').eq('id', tag_id).single().execute()
+        existing = supabase_client.table('tags').select('*').eq('id', tag_id).single().execute()
         if not existing.data:
             raise HTTPException(status_code=404, detail="Tag not found")
         
@@ -454,7 +454,7 @@ async def update_tag(tag_id: str, tag_data: TagCreate):
             'updated_at': datetime.utcnow().isoformat()
         }
         
-        result = supabase_client.table('text_grow.tags').update(update_data).eq('id', tag_id).execute()
+        result = supabase_client.table('tags').update(update_data).eq('id', tag_id).execute()
         
         updated_tag = result.data[0]
         return Tag(
@@ -471,15 +471,15 @@ async def delete_tag(tag_id: str):
     """Delete a tag"""
     try:
         # Check if tag exists
-        existing = supabase_client.table('text_grow.tags').select('*').eq('id', tag_id).single().execute()
+        existing = supabase_client.table('tags').select('*').eq('id', tag_id).single().execute()
         if not existing.data:
             raise HTTPException(status_code=404, detail="Tag not found")
         
         # Delete tag assignments
-        supabase_client.table('text_grow.shortcut_tag_assignments').delete().eq('tag_id', tag_id).execute()
+        supabase_client.table('shortcut_tag_assignments').delete().eq('tag_id', tag_id).execute()
         
         # Delete tag
-        supabase_client.table('text_grow.tags').delete().eq('id', tag_id).execute()
+        supabase_client.table('tags').delete().eq('id', tag_id).execute()
         
         return {"message": "Tag deleted successfully"}
     except Exception as e:
@@ -491,8 +491,8 @@ async def export_shortcuts(user_id: str = Depends(get_current_user)):
     """Export all user shortcuts"""
     try:
         # Get all user data
-        shortcuts_result = supabase_client.table('text_grow.shortcuts').select('*').eq('user_id', user_id).execute()
-        folders_result = supabase_client.table('text_grow.folders').select('*').eq('user_id', user_id).execute()
+        shortcuts_result = supabase_client.table('shortcuts').select('*').eq('user_id', user_id).execute()
+        folders_result = supabase_client.table('folders').select('*').eq('user_id', user_id).execute()
         
         export_data = {
             'version': '1.0',
@@ -524,7 +524,7 @@ async def import_shortcuts(import_data: Dict[str, Any], user_id: str = Depends(g
                     'updated_at': datetime.utcnow().isoformat()
                 }
                 
-                supabase_client.table('text_grow.shortcuts').insert(new_shortcut).execute()
+                supabase_client.table('shortcuts').insert(new_shortcut).execute()
                 imported_count += 1
         
         return {"imported_count": imported_count}
@@ -536,7 +536,7 @@ async def create_tag(tag_data: TagCreate):
     """Create a new tag"""
     try:
         # Check if tag already exists
-        existing = supabase_client.table('text_grow.tags').select('*').eq('name', tag_data.name).execute()
+        existing = supabase_client.table('tags').select('*').eq('name', tag_data.name).execute()
         if existing.data:
             return Tag(**existing.data[0])
         
@@ -550,7 +550,7 @@ async def create_tag(tag_data: TagCreate):
             'updated_at': now.isoformat()
         }
         
-        result = supabase_client.table('text_grow.tags').insert(new_tag).execute()
+        result = supabase_client.table('tags').insert(new_tag).execute()
         
         return Tag(
             id=tag_id,
@@ -567,7 +567,7 @@ async def search_shortcuts(q: str, user_id: str = Depends(get_current_user)):
     """Search shortcuts by trigger, content, or tags"""
     try:
         # Search in triggers and content
-        result = supabase_client.table('text_grow.shortcuts').select('*').eq('user_id', user_id).or_(f'trigger.ilike.%{q}%,content.ilike.%{q}%').execute()
+        result = supabase_client.table('shortcuts').select('*').eq('user_id', user_id).or_(f'trigger.ilike.%{q}%,content.ilike.%{q}%').execute()
         
         shortcuts_with_details = []
         for shortcut in result.data:
