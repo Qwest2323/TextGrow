@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TextGrow Extension Setup</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f9fafb;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 8px;
+        }
+        button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #2563eb;
+        }
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 10px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 TextGrow Extension Setup</h1>
+        
+        <div class="step">
+            <h3>Step 1: Setup Mock Authentication</h3>
+            <p>Click this button to configure your extension with test data:</p>
+            <button onclick="setupExtension()">Setup Extension with Test Data</button>
+            <div id="result1"></div>
+        </div>
+        
+        <div class="step">
+            <h3>Step 2: Test Your Extension</h3>
+            <p>After setup:</p>
+            <ol>
+                <li>Go to Gmail, Google.com, or any website</li>
+                <li>Click in a text input field</li>
+                <li>Type <code>@test</code> and wait 2 seconds</li>
+                <li>It should expand to "Hello from TextGrow!"</li>
+            </ol>
+        </div>
+        
+        <div class="step">
+            <h3>Step 3: Check Extension Status</h3>
+            <button onclick="checkExtension()">Check Extension Status</button>
+            <div id="result2"></div>
+        </div>
+    </div>
+
+    <script>
+        async function setupExtension() {
+            const result1 = document.getElementById('result1');
+            
+            try {
+                // Check if Chrome extension APIs are available
+                if (!chrome || !chrome.storage) {
+                    result1.innerHTML = '<div class="error">This page needs to be opened from your TextGrow extension or Chrome extension context.</div>';
+                    return;
+                }
+                
+                // Set up mock authentication
+                await chrome.storage.local.set({
+                    'textgrow_user_token': 'mock-token-12345',
+                    'textgrow_shortcuts': [
+                        {
+                            id: '1',
+                            trigger: '@test',
+                            content: 'Hello from TextGrow!',
+                            user_id: 'test-user',
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        },
+                        {
+                            id: '2', 
+                            trigger: '@email',
+                            content: 'your.email@example.com',
+                            user_id: 'test-user',
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        }
+                    ],
+                    'textgrow_settings': {
+                        enabled: true,
+                        showDropdown: true,
+                        autoExpand: true,
+                        triggerDelay: 500
+                    }
+                });
+                
+                result1.innerHTML = '<div class="success">✅ Extension configured successfully! Close and reopen your TextGrow extension popup to see the shortcuts.</div>';
+                
+            } catch (error) {
+                result1.innerHTML = '<div class="error">❌ Error: ' + error.message + '</div>';
+            }
+        }
+        
+        async function checkExtension() {
+            const result2 = document.getElementById('result2');
+            
+            try {
+                if (!chrome || !chrome.storage) {
+                    result2.innerHTML = '<div class="error">Chrome extension APIs not available. Open this page from your extension.</div>';
+                    return;
+                }
+                
+                const data = await chrome.storage.local.get(['textgrow_user_token', 'textgrow_shortcuts', 'textgrow_settings']);
+                
+                const token = data.textgrow_user_token;
+                const shortcuts = data.textgrow_shortcuts || [];
+                const settings = data.textgrow_settings || {};
+                
+                result2.innerHTML = `
+                    <div class="success">
+                        <strong>Extension Status:</strong><br>
+                        🔑 Token: ${token ? 'Present' : 'Missing'}<br>
+                        📝 Shortcuts: ${shortcuts.length} loaded<br>
+                        ⚙️ Settings: ${settings.enabled ? 'Enabled' : 'Disabled'}<br>
+                        ${shortcuts.length > 0 ? '<br><strong>Your shortcuts:</strong><br>' + shortcuts.map(s => `• ${s.trigger} → ${s.content.substring(0, 30)}...`).join('<br>') : ''}
+                    </div>
+                `;
+                
+            } catch (error) {
+                result2.innerHTML = '<div class="error">❌ Error checking status: ' + error.message + '</div>';
+            }
+        }
+        
+        // Auto-setup if opened from extension
+        if (window.location.search.includes('auto=true')) {
+            window.addEventListener('load', setupExtension);
+        }
+    </script>
+</body>
+</html>
