@@ -38,6 +38,7 @@ class TextGrowPopup {
     // Authentication
     document.getElementById('signInBtn')?.addEventListener('click', this.handleSignIn.bind(this));
     document.getElementById('signOutBtn')?.addEventListener('click', this.handleSignOut.bind(this));
+    document.getElementById('pasteTokenBtn')?.addEventListener('click', this.handlePasteToken.bind(this));
     
     // Search
     document.getElementById('searchInput')?.addEventListener('input', this.handleSearch.bind(this));
