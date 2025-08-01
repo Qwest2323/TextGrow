@@ -132,12 +132,14 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
                 'id': mock_user_id,
                 'email': 'demo@textgrow.com',
                 'name': 'Demo User',
-                'avatar_url': None,
-                'preferences': {},
                 'created_at': datetime.utcnow().isoformat(),
                 'updated_at': datetime.utcnow().isoformat()
             }
-            supabase_client.table('users').insert(mock_user).execute()
+            try:
+                supabase_client.table('users').insert(mock_user).execute()
+            except Exception as insert_error:
+                print(f"Failed to create mock user: {insert_error}")
+                # Just continue with the existing user ID
         
         return mock_user_id
 
