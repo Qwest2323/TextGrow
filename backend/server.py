@@ -123,7 +123,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     except Exception as e:
         # For development, we'll create a mock user if no token is provided
         # In production, this should be removed
-        mock_user_id = "mock-user-123"
+        mock_user_id = "12345678-1234-1234-1234-123456789012"
         
         # Ensure mock user exists in database
         existing_user = supabase_client.table('users').select('*').eq('id', mock_user_id).execute()
