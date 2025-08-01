@@ -566,34 +566,25 @@ async def create_tag(tag_data: TagCreate):
         raise HTTPException(status_code=400, detail=str(e))
 
 # Search endpoint
-@api_router.get("/search", response_model=List[ShortcutWithDetails])
+@api_router.get("/search", response_model=List[Shortcut])
 async def search_shortcuts(q: str, user_id: str = Depends(get_current_user)):
     """Search shortcuts by trigger, content, or tags"""
     try:
         # Search in triggers and content
         result = supabase_client.table('shortcuts').select('*').eq('user_id', user_id).or_(f'trigger.ilike.%{q}%,content.ilike.%{q}%').execute()
         
-        shortcuts_with_details = []
+        shortcuts = []
         for shortcut in result.data:
-            # Get folders and tags for each shortcut (same as get_shortcuts)
-            folders_result = supabase_client.rpc('get_shortcut_folders', {'shortcut_id': shortcut['id']}).execute()
-            folders = [Folder(**folder) for folder in (folders_result.data or [])]
-            
-            tags_result = supabase_client.rpc('get_shortcut_tags', {'shortcut_id': shortcut['id']}).execute()
-            tags = [Tag(**tag) for tag in (tags_result.data or [])]
-            
-            shortcuts_with_details.append(ShortcutWithDetails(
+            shortcuts.append(Shortcut(
                 id=shortcut['id'],
                 user_id=shortcut['user_id'],
                 trigger=shortcut['trigger'],
                 content=shortcut['content'],
                 created_at=datetime.fromisoformat(shortcut['created_at']),
-                updated_at=datetime.fromisoformat(shortcut['updated_at']),
-                folders=folders,
-                tags=tags
+                updated_at=datetime.fromisoformat(shortcut['updated_at'])
             ))
         
-        return shortcuts_with_details
+        return shortcuts
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
