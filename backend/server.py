@@ -163,7 +163,7 @@ async def signup(user_data: UserCreate):
     """Create a new user account"""
     try:
         # Check if user already exists
-        existing_user = supabase_client.table('users').select('*').eq('email', user_data.email).execute()
+        existing_user = supabase_client.table('text_grow.users').select('*').eq('email', user_data.email).execute()
         if existing_user.data:
             raise HTTPException(status_code=400, detail="User already exists")
         
@@ -181,7 +181,7 @@ async def signup(user_data: UserCreate):
             'updated_at': now.isoformat()
         }
         
-        result = supabase_client.table('users').insert(new_user).execute()
+        result = supabase_client.table('text_grow.users').insert(new_user).execute()
         return {"message": "User created successfully", "user_id": user_id}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
