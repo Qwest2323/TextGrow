@@ -567,7 +567,7 @@ async def search_shortcuts(q: str, user_id: str = Depends(get_current_user)):
     """Search shortcuts by trigger, content, or tags"""
     try:
         # Search in triggers and content
-        result = supabase_client.table('shortcuts').select('*').eq('user_id', user_id).or_(f'trigger.ilike.%{q}%,content.ilike.%{q}%').execute()
+        result = supabase_client.table('text_grow.shortcuts').select('*').eq('user_id', user_id).or_(f'trigger.ilike.%{q}%,content.ilike.%{q}%').execute()
         
         shortcuts_with_details = []
         for shortcut in result.data:
