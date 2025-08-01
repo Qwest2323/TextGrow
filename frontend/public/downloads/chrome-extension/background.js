@@ -2,7 +2,7 @@
 console.log('TextGrow background script loaded');
 
 // Configuration
-const API_BASE_URL = 'https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com/api';
+const API_BASE_URL = 'https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com/api';
 const SUPABASE_URL = 'https://lkpdmllkksgybuwipkjf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxrcGRtbGxra3NneWJ1d2lwa2pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MDk4NjcsImV4cCI6MjA2MzE4NTg2N30.1mny2GnXzwSKmLm_LLP7-7Gnq16UYhl5ayTugULhLKs';
 
@@ -36,7 +36,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === 'install') {
     // Open welcome page on first install
     chrome.tabs.create({
-      url: 'https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com'
+      url: 'https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com'
     });
   }
 });

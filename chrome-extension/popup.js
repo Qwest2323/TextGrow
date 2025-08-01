@@ -209,7 +209,7 @@ class TextGrowPopup {
   async handleSignIn() {
     try {
       // Open setup page first, then dashboard
-      const setupUrl = 'https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com/extension-setup.html?auto=true';
+      const setupUrl = 'https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com/extension-setup.html?auto=true';
       chrome.tabs.create({ url: setupUrl });
       
       this.showTemporaryStatus('Opening setup page...');
@@ -252,12 +252,12 @@ class TextGrowPopup {
   }
   
   handleAdd() {
-    const dashboardUrl = 'https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com';
+    const dashboardUrl = 'https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com';
     chrome.tabs.create({ url: dashboardUrl });
   }
   
   editShortcut(shortcutId) {
-    const dashboardUrl = `https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com?edit=${shortcutId}`;
+    const dashboardUrl = `https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com?edit=${shortcutId}`;
     chrome.tabs.create({ url: dashboardUrl });
   }
   
@@ -310,12 +310,12 @@ class TextGrowPopup {
   }
   
   openDashboard() {
-    const dashboardUrl = 'https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com';
+    const dashboardUrl = 'https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com';
     chrome.tabs.create({ url: dashboardUrl });
   }
   
   openHelp() {
-    const helpUrl = 'https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com/help';
+    const helpUrl = 'https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com/help';
     chrome.tabs.create({ url: helpUrl });
   }
   

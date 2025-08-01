@@ -121,7 +121,7 @@ chrome-extension/
 - **Permission Scope**: Only requests necessary permissions
 
 ## Support
-- **Web Dashboard**: https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com
+- **Web Dashboard**: https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com
 - **Create Shortcuts**: Use the web dashboard to manage your shortcuts
 - **Report Issues**: Contact support through the web dashboard
 

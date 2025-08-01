@@ -208,7 +208,7 @@ class TextGrowPopup {
   async handleSignIn() {
     try {
       // Open TextGrow web app for authentication
-      const dashboardUrl = 'https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com/auth';
+      const dashboardUrl = 'https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com/auth';
       chrome.tabs.create({ url: dashboardUrl });
       
       // Show status
@@ -252,12 +252,12 @@ class TextGrowPopup {
   }
   
   handleAdd() {
-    const dashboardUrl = 'https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com';
+    const dashboardUrl = 'https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com';
     chrome.tabs.create({ url: dashboardUrl });
   }
   
   editShortcut(shortcutId) {
-    const dashboardUrl = `https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com?edit=${shortcutId}`;
+    const dashboardUrl = `https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com?edit=${shortcutId}`;
     chrome.tabs.create({ url: dashboardUrl });
   }
   
@@ -310,12 +310,12 @@ class TextGrowPopup {
   }
   
   openDashboard() {
-    const dashboardUrl = 'https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com';
+    const dashboardUrl = 'https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com';
     chrome.tabs.create({ url: dashboardUrl });
   }
   
   openHelp() {
-    const helpUrl = 'https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com/help';
+    const helpUrl = 'https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com/help';
     chrome.tabs.create({ url: helpUrl });
   }
   

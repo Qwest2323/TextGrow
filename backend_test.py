@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 
 class TextGrowAPITester:
-    def __init__(self, base_url="https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.headers = {
             'Content-Type': 'application/json',
