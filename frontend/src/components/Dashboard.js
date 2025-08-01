@@ -42,6 +42,9 @@ const Dashboard = ({ session }) => {
   const fetchData = async () => {
     try {
       setLoading(true);
+      console.log('Session data:', session);
+      console.log('Access token:', session?.access_token ? 'Present' : 'Missing');
+      
       await Promise.all([
         fetchShortcuts(),
         fetchFolders(), 
