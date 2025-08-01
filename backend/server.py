@@ -345,6 +345,54 @@ async def get_folders(user_id: str = Depends(get_current_user)):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@api_router.put("/folders/{folder_id}", response_model=Folder)
+async def update_folder(folder_id: str, folder_data: FolderUpdate, user_id: str = Depends(get_current_user)):
+    """Update a folder"""
+    try:
+        # Verify ownership
+        existing = supabase_client.table('folders').select('*').eq('id', folder_id).eq('user_id', user_id).single().execute()
+        if not existing.data:
+            raise HTTPException(status_code=404, detail="Folder not found")
+        
+        update_data = {
+            'name': folder_data.name,
+            'updated_at': datetime.utcnow().isoformat()
+        }
+        
+        result = supabase_client.table('folders').update(update_data).eq('id', folder_id).execute()
+        
+        updated_folder = result.data[0]
+        return Folder(
+            id=updated_folder['id'],
+            user_id=updated_folder['user_id'],
+            name=updated_folder['name'],
+            created_at=datetime.fromisoformat(updated_folder['created_at']),
+            updated_at=datetime.fromisoformat(updated_folder['updated_at'])
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.delete("/folders/{folder_id}")
+async def delete_folder(folder_id: str, user_id: str = Depends(get_current_user)):
+    """Delete a folder"""
+    try:
+        # Verify ownership
+        existing = supabase_client.table('folders').select('*').eq('id', folder_id).eq('user_id', user_id).single().execute()
+        if not existing.data:
+            raise HTTPException(status_code=404, detail="Folder not found")
+        
+        # Delete folder shortcuts associations
+        supabase_client.table('folder_shortcuts').delete().eq('folder_id', folder_id).execute()
+        
+        # Delete folder  
+        supabase_client.table('folders').delete().eq('id', folder_id).execute()
+        
+        return {"message": "Folder deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @api_router.post("/folders", response_model=Folder)
 async def create_folder(folder_data: FolderCreate, user_id: str = Depends(get_current_user)):
     """Create a new folder"""
