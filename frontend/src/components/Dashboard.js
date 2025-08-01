@@ -150,110 +150,20 @@ const Dashboard = ({ session }) => {
   const copyExtensionToken = async () => {
     try {
       if (session?.access_token) {
+        // Try clipboard API first
         try {
-          // First try the modern clipboard API
           await navigator.clipboard.writeText(session.access_token);
           toast.success('Extension token copied! Now paste it in your TextGrow extension popup.');
+          return;
         } catch (clipboardError) {
-          // Fallback: Show the token in a popup for manual copying
-          console.warn('Clipboard access denied, showing token for manual copy:', clipboardError);
-          
-          // Create a modal with the token
-          const modal = document.createElement('div');
-          modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-          `;
-          
-          const content = document.createElement('div');
-          content.style.cssText = `
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            max-width: 600px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-          `;
-          
-          content.innerHTML = `
-            <h3 style="margin-bottom: 15px; color: #1f2937;">📱 Copy Extension Token</h3>
-            <p style="margin-bottom: 20px; color: #6b7280;">Select and copy the token below:</p>
-            <textarea readonly style="
-              width: 100%;
-              height: 100px;
-              padding: 12px;
-              border: 2px solid #3b82f6;
-              border-radius: 8px;
-              font-family: monospace;
-              font-size: 12px;
-              background: #f8fafc;
-              resize: none;
-              margin-bottom: 15px;
-            ">${session.access_token}</textarea>
-            <div>
-              <button id="closeTokenModal" style="
-                background: #3b82f6;
-                color: white;
-                border: none;
-                padding: 12px 24px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-size: 16px;
-                margin-right: 10px;
-              ">Close</button>
-              <button id="selectTokenText" style="
-                background: #10b981;
-                color: white;
-                border: none;
-                padding: 12px 24px;
-                border-radius: 8px;
-                cursor: pointer;
-                font-size: 16px;
-              ">Select All</button>
-            </div>
-          `;
-          
-          modal.appendChild(content);
-          document.body.appendChild(modal);
-          
-          // Auto-select the textarea text
-          const textarea = content.querySelector('textarea');
-          textarea.select();
-          textarea.focus();
-          
-          // Event handlers
-          content.querySelector('#closeTokenModal').onclick = () => {
-            document.body.removeChild(modal);
-          };
-          
-          content.querySelector('#selectTokenText').onclick = () => {
-            textarea.select();
-            textarea.focus();
-            try {
-              document.execCommand('copy');
-              toast.success('Token selected! Use Ctrl+C or Cmd+C to copy.');
-            } catch (e) {
-              toast.info('Token selected! Use Ctrl+C or Cmd+C to copy.');
-            }
-          };
-          
-          modal.onclick = (e) => {
-            if (e.target === modal) {
-              document.body.removeChild(modal);
-            }
-          };
-          
-          toast.info('Token displayed for manual copying. Click "Select All" and copy.');
+          console.warn('Clipboard API failed:', clipboardError);
         }
+        
+        // Fallback: Create a simple prompt with the token
+        const tokenText = session.access_token;
+        prompt('Copy this token for your Chrome extension:\n\n(Select all text and copy with Ctrl+C)', tokenText);
+        toast.info('Token displayed in popup. Please copy it manually.');
+        
       } else {
         toast.error('No authentication token available. Please sign in first.');
       }
