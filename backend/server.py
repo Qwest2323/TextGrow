@@ -303,7 +303,7 @@ async def delete_shortcut(shortcut_id: str, user_id: str = Depends(get_current_u
         supabase_client.table('text_grow.folder_shortcuts').delete().eq('shortcut_id', shortcut_id).execute()
         
         # Delete shortcut
-        supabase_client.table('text_grow.shortcuts').delete().eq('id', shortcut_id).execute()
+        supabase_client.table('shortcuts').delete().eq('id', shortcut_id).execute()
         
         return {"message": "Shortcut deleted successfully"}
     except Exception as e:
