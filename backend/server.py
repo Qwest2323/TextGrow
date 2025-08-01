@@ -299,8 +299,8 @@ async def delete_shortcut(shortcut_id: str, user_id: str = Depends(get_current_u
             raise HTTPException(status_code=404, detail="Shortcut not found")
         
         # Delete associations first
-        supabase_client.table('text_grow.shortcut_tag_assignments').delete().eq('shortcut_id', shortcut_id).execute()
-        supabase_client.table('text_grow.folder_shortcuts').delete().eq('shortcut_id', shortcut_id).execute()
+        supabase_client.table('shortcut_tag_assignments').delete().eq('shortcut_id', shortcut_id).execute()
+        supabase_client.table('folder_shortcuts').delete().eq('shortcut_id', shortcut_id).execute()
         
         # Delete shortcut
         supabase_client.table('shortcuts').delete().eq('id', shortcut_id).execute()
