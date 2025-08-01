@@ -379,15 +379,15 @@ async def delete_folder(folder_id: str, user_id: str = Depends(get_current_user)
     """Delete a folder"""
     try:
         # Verify ownership
-        existing = supabase_client.table('folders').select('*').eq('id', folder_id).eq('user_id', user_id).single().execute()
+        existing = supabase_client.table('text_grow.folders').select('*').eq('id', folder_id).eq('user_id', user_id).single().execute()
         if not existing.data:
             raise HTTPException(status_code=404, detail="Folder not found")
         
         # Delete folder shortcuts associations
-        supabase_client.table('folder_shortcuts').delete().eq('folder_id', folder_id).execute()
+        supabase_client.table('text_grow.folder_shortcuts').delete().eq('folder_id', folder_id).execute()
         
         # Delete folder  
-        supabase_client.table('folders').delete().eq('id', folder_id).execute()
+        supabase_client.table('text_grow.folders').delete().eq('id', folder_id).execute()
         
         return {"message": "Folder deleted successfully"}
     except Exception as e:
