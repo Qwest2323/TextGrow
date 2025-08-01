@@ -21,20 +21,8 @@ supabase_anon_key = os.environ['SUPABASE_ANON_KEY']
 supabase_service_key = os.environ['SUPABASE_SERVICE_KEY']
 
 # Create Supabase clients
-supabase_client: Client = create_client(
-    supabase_url, 
-    supabase_service_key,
-    options={
-        'schema': 'text_grow'
-    }
-)
-supabase_anon: Client = create_client(
-    supabase_url, 
-    supabase_anon_key,
-    options={
-        'schema': 'text_grow'
-    }
-)
+supabase_client: Client = create_client(supabase_url, supabase_service_key)
+supabase_anon: Client = create_client(supabase_url, supabase_anon_key)
 
 # Create the main app
 app = FastAPI(title="TextGrow API", version="1.0.0")
