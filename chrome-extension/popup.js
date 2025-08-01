@@ -207,15 +207,14 @@ class TextGrowPopup {
   
   async handleSignIn() {
     try {
-      // Open TextGrow web app for authentication
-      const dashboardUrl = 'https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com/auth';
-      chrome.tabs.create({ url: dashboardUrl });
+      // Open setup page first, then dashboard
+      const setupUrl = 'https://33b05a3b-9bfa-4997-839a-18d5ce3a17bd.preview.emergentagent.com/extension-setup.html?auto=true';
+      chrome.tabs.create({ url: setupUrl });
       
-      // Show status
-      this.showTemporaryStatus('Opening TextGrow for sign in...');
+      this.showTemporaryStatus('Opening setup page...');
     } catch (error) {
-      console.error('Error signing in:', error);
-      this.showTemporaryStatus('Error opening sign in page', 'error');
+      console.error('Error opening setup:', error);
+      this.showTemporaryStatus('Error opening setup page', 'error');
     }
   }
   
