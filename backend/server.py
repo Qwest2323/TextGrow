@@ -524,7 +524,7 @@ async def import_shortcuts(import_data: Dict[str, Any], user_id: str = Depends(g
                     'updated_at': datetime.utcnow().isoformat()
                 }
                 
-                supabase_client.table('shortcuts').insert(new_shortcut).execute()
+                supabase_client.table('text_grow.shortcuts').insert(new_shortcut).execute()
                 imported_count += 1
         
         return {"imported_count": imported_count}
