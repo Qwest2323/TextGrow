@@ -352,7 +352,7 @@ async def update_folder(folder_id: str, folder_data: FolderUpdate, user_id: str 
     """Update a folder"""
     try:
         # Verify ownership
-        existing = supabase_client.table('folders').select('*').eq('id', folder_id).eq('user_id', user_id).single().execute()
+        existing = supabase_client.table('text_grow.folders').select('*').eq('id', folder_id).eq('user_id', user_id).single().execute()
         if not existing.data:
             raise HTTPException(status_code=404, detail="Folder not found")
         
@@ -361,7 +361,7 @@ async def update_folder(folder_id: str, folder_data: FolderUpdate, user_id: str 
             'updated_at': datetime.utcnow().isoformat()
         }
         
-        result = supabase_client.table('folders').update(update_data).eq('id', folder_id).execute()
+        result = supabase_client.table('text_grow.folders').update(update_data).eq('id', folder_id).execute()
         
         updated_folder = result.data[0]
         return Folder(
