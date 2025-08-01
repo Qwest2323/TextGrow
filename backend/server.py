@@ -133,29 +133,33 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid authentication credentials"
             )
-        return user.user.id
-    except Exception as e:
-        # For development, we'll create a mock user if no token is provided
-        # In production, this should be removed
-        mock_user_id = "12345678-1234-1234-1234-123456789012"
         
-        # Ensure mock user exists in database
-        existing_user = supabase_client.table('users').select('*').eq('id', mock_user_id).execute()
+        user_id = user.user.id
+        
+        # Ensure user exists in our database
+        existing_user = supabase_client.table('users').select('*').eq('id', user_id).execute()
         if not existing_user.data:
-            mock_user = {
-                'id': mock_user_id,
-                'email': 'demo@textgrow.com',
-                'name': 'Demo User',
+            user_metadata = user.user.user_metadata or {}
+            new_user = {
+                'id': user_id,
+                'email': user.user.email,
+                'name': user_metadata.get('full_name') or user_metadata.get('name'),
+                'avatar_url': user_metadata.get('avatar_url'),
                 'created_at': datetime.utcnow().isoformat(),
                 'updated_at': datetime.utcnow().isoformat()
             }
             try:
-                supabase_client.table('users').insert(mock_user).execute()
+                supabase_client.table('users').insert(new_user).execute()
             except Exception as insert_error:
-                print(f"Failed to create mock user: {insert_error}")
-                # Just continue with the existing user ID
+                print(f"User might already exist: {insert_error}")
         
-        return mock_user_id
+        return user_id
+    except Exception as e:
+        print(f"Authentication error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials"
+        )
 
 # Health check endpoints
 @api_router.get("/")
