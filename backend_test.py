@@ -28,70 +28,85 @@ class TextGrowAPITester:
             # Get Supabase credentials from environment
             supabase_url = "https://lkpdmllkksgybuwipkjf.supabase.co"
             supabase_anon_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxrcGRtbGxra3NneWJ1d2lwa2pmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc2MDk4NjcsImV4cCI6MjA2MzE4NTg2N30.1mny2GnXzwSKmLm_LLP7-7Gnq16UYhl5ayTugULhLKs"
+            supabase_service_key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxrcGRtbGxra3NneWJ1d2lwa2pmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NzYwOTg2NywiZXhwIjoyMDYzMTg1ODY3fQ.-Gtoq4F42jjlAMwkJabBB2HbJ8L_BOBlkOqAvjrc8QM"
             
+            # Try with service key first for admin operations
+            service_client = create_client(supabase_url, supabase_service_key)
             self.supabase_client = create_client(supabase_url, supabase_anon_key)
             
-            # Try different test users
-            test_users = [
-                ("testuser1@textgrow.dev", "testpassword123"),
-                ("testuser2@textgrow.dev", "testpassword123"),
-                ("testuser3@textgrow.dev", "testpassword123"),
-                ("demo@textgrow.com", "demopassword123")
-            ]
+            # Try to create a test user using service key
+            test_email = "apitest@example.com"
+            test_password = "testpassword123"
             
-            for test_email, test_password in test_users:
-                print(f"🔐 Trying authentication for {test_email}...")
-                
-                # Try to sign in first
+            print(f"🔐 Setting up test user with service key: {test_email}...")
+            
+            try:
+                # First try to delete any existing test user
                 try:
+                    service_client.auth.admin.delete_user(test_email)
+                    print("🗑️  Cleaned up existing test user")
+                except:
+                    pass  # User might not exist
+                
+                # Create user with service key (admin)
+                user_response = service_client.auth.admin.create_user({
+                    "email": test_email,
+                    "password": test_password,
+                    "email_confirm": True,  # Auto-confirm email
+                    "user_metadata": {
+                        "name": "API Test User"
+                    }
+                })
+                
+                if user_response.user:
+                    print("✅ Created test user with service key")
+                    
+                    # Now sign in with the regular client
                     auth_response = self.supabase_client.auth.sign_in_with_password({
                         "email": test_email,
                         "password": test_password
                     })
-                    print("✅ Signed in with existing test user")
                     
-                    # Get the access token
                     if auth_response.session and auth_response.session.access_token:
                         self.auth_token = auth_response.session.access_token
                         self.headers['Authorization'] = f'Bearer {self.auth_token}'
                         print(f"✅ Authentication token obtained: {self.auth_token[:20]}...")
                         return True
-                        
-                except Exception as signin_error:
-                    print(f"⚠️  Sign in failed for {test_email}: {signin_error}")
-                    continue
-            
-            # If all sign-ins failed, try to create a new user with a unique email
-            import time
-            unique_email = f"test{int(time.time())}@example.com"
-            test_password = "testpassword123"
-            
-            print(f"🔐 Creating new test user: {unique_email}...")
-            try:
-                auth_response = self.supabase_client.auth.sign_up({
-                    "email": unique_email,
-                    "password": test_password,
-                    "options": {
-                        "data": {
-                            "name": "Test User"
-                        }
-                    }
-                })
-                print("✅ Created new test user")
-                
-                # Get the access token
-                if auth_response.session and auth_response.session.access_token:
-                    self.auth_token = auth_response.session.access_token
-                    self.headers['Authorization'] = f'Bearer {self.auth_token}'
-                    print(f"✅ Authentication token obtained: {self.auth_token[:20]}...")
-                    return True
+                    else:
+                        print("❌ No access token received after sign in")
+                        return False
                 else:
-                    print("❌ No access token received from new user")
+                    print("❌ Failed to create user with service key")
                     return False
                     
-            except Exception as signup_error:
-                print(f"❌ Failed to create new user: {signup_error}")
-                return False
+            except Exception as admin_error:
+                print(f"⚠️  Service key approach failed: {admin_error}")
+                
+                # Fallback: try regular sign up with a simple email
+                try:
+                    print("🔐 Trying regular signup as fallback...")
+                    auth_response = self.supabase_client.auth.sign_up({
+                        "email": "test@example.com",
+                        "password": "password123",
+                        "options": {
+                            "data": {
+                                "name": "Test User"
+                            }
+                        }
+                    })
+                    
+                    if auth_response.session and auth_response.session.access_token:
+                        self.auth_token = auth_response.session.access_token
+                        self.headers['Authorization'] = f'Bearer {self.auth_token}'
+                        print(f"✅ Authentication token obtained via signup: {self.auth_token[:20]}...")
+                        return True
+                    else:
+                        print("❌ No access token received from signup")
+                        return False
+                        
+                except Exception as signup_error:
+                    print(f"❌ Regular signup also failed: {signup_error}")
+                    return False
                 
         except Exception as e:
             print(f"❌ Authentication setup failed: {str(e)}")
