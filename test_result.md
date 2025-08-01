@@ -173,7 +173,7 @@ frontend:
         comment: "copyExtensionToken function exists and copies session token to clipboard"
 
   - task: "Chrome Extension Token Paste Function"
-    implemented: false
+    implemented: true
     working: false
     file: "popup.js"
     stuck_count: 0
@@ -183,6 +183,9 @@ frontend:
       - working: false
         agent: "main"
         comment: "handlePasteToken function is referenced but not implemented in popup.js"
+      - working: true
+        agent: "main"
+        comment: "handlePasteToken function implemented. Validates JWT format, stores token, triggers sync, updates UI state."
 
 metadata:
   created_by: "main_agent"
