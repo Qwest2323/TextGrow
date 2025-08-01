@@ -425,7 +425,7 @@ async def create_folder(folder_data: FolderCreate, user_id: str = Depends(get_cu
 async def get_tags():
     """Get all available tags"""
     try:
-        result = supabase_client.table('tags').select('*').execute()
+        result = supabase_client.table('text_grow.tags').select('*').execute()
         
         tags = []
         for tag in result.data:
