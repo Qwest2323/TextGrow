@@ -89,6 +89,11 @@ const Dashboard = ({ session }) => {
       const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
       const token = session?.access_token;
       
+      if (!token) {
+        console.error('No access token available');
+        return;
+      }
+      
       const response = await fetch(`${BACKEND_URL}/api/folders`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -97,7 +102,7 @@ const Dashboard = ({ session }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch folders');
+        throw new Error(`Failed to fetch folders: ${response.status}`);
       }
 
       const data = await response.json();
