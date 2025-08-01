@@ -196,7 +196,7 @@ async def get_shortcuts(user_id: str = Depends(get_current_user)):
     """Get all shortcuts for the current user with folder and tag details"""
     try:
         # Get shortcuts
-        shortcuts_result = supabase_client.table('text_grow.shortcuts').select('*').eq('user_id', user_id).execute()
+        shortcuts_result = supabase_client.table('shortcuts').select('*').eq('user_id', user_id).execute()
         
         shortcuts_with_details = []
         for shortcut in shortcuts_result.data:
