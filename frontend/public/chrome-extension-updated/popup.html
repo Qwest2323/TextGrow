@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TextGrow</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon">TG</div>
+        <span class="logo-text">TextGrow</span>
+      </div>
+      <div class="status-indicator" id="statusIndicator">
+        <div class="status-dot"></div>
+        <span class="status-text">Syncing...</span>
+      </div>
+    </div>
+
+    <!-- Not Authenticated State -->
+    <div id="notAuthenticatedState" class="auth-section">
+      <div class="auth-message">
+        <h3>Connect Your TextGrow Account</h3>
+        <p>Connect to your TextGrow account to access your shortcuts across all devices.</p>
+        
+        <!-- Token Input Method -->
+        <div class="token-input-section" style="margin: 20px 0;">
+          <h4 style="font-size: 14px; margin-bottom: 10px;">Option 1: Paste Token</h4>
+          <input type="text" id="tokenInput" placeholder="Paste your extension token here..." 
+                 class="token-input" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 12px; margin-bottom: 10px;">
+          <button id="pasteTokenBtn" class="btn btn-primary" style="width: 100%; font-size: 12px; padding: 8px;">
+            Connect with Token
+          </button>
+          <p style="font-size: 11px; color: #6b7280; margin-top: 5px;">
+            1. Sign in to TextGrow dashboard<br>
+            2. Click "📱 Copy Extension Token"<br>
+            3. Paste token above and click Connect
+          </p>
+        </div>
+        
+        <div style="text-align: center; margin: 15px 0; color: #9ca3af;">— OR —</div>
+        
+        <!-- Sign In Method -->
+        <div>
+          <h4 style="font-size: 14px; margin-bottom: 10px;">Option 2: Sign In</h4>
+          <button id="signInBtn" class="btn btn-secondary" style="width: 100%;">
+            Open TextGrow Dashboard
+          </button>
+        </div>
+        
+        <!-- Setup Test Data (for testing) -->
+        <div style="margin-top: 20px; border-top: 1px solid #e5e7eb; padding-top: 15px;">
+          <button id="setupBtn" class="btn" style="width: 100%; font-size: 12px; background: #f3f4f6; color: #374151;">
+            🛠️ Setup Test Data (for testing)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Authenticated State -->
+    <div id="authenticatedState" class="main-content" style="display: none;">
+      <!-- Search Bar -->
+      <div class="search-section">
+        <div class="search-input-container">
+          <input type="text" id="searchInput" placeholder="Search shortcuts..." class="search-input">
+          <div class="search-icon">🔍</div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <button id="syncBtn" class="action-btn" title="Sync Now">
+          <span class="icon">🔄</span>
+          Sync
+        </button>
+        <button id="addBtn" class="action-btn" title="Add Shortcut">
+          <span class="icon">➕</span>
+          Add
+        </button>
+        <button id="settingsBtn" class="action-btn" title="Settings">
+          <span class="icon">⚙️</span>
+          Settings
+        </button>
+      </div>
+
+      <!-- Shortcuts List -->
+      <div class="shortcuts-section">
+        <div class="section-header">
+          <h4>Recent Shortcuts</h4>
+          <span id="shortcutCount" class="count">0</span>
+        </div>
+        <div id="shortcutsList" class="shortcuts-list">
+          <!-- Shortcuts will be populated here -->
+        </div>
+        <div id="noShortcuts" class="empty-state">
+          <div class="empty-icon">📝</div>
+          <p>No shortcuts found</p>
+          <button id="createFirstBtn" class="btn btn-secondary">Create your first shortcut</button>
+        </div>
+      </div>
+
+      <!-- Settings Panel -->
+      <div id="settingsPanel" class="settings-panel" style="display: none;">
+        <div class="panel-header">
+          <h4>Settings</h4>
+          <button id="closeSettingsBtn" class="close-btn">✕</button>
+        </div>
+        <div class="settings-content">
+          <div class="setting-item">
+            <label class="setting-label">
+              <input type="checkbox" id="enabledToggle" checked>
+              <span class="checkmark"></span>
+              Enable TextGrow
+            </label>
+          </div>
+          <div class="setting-item">
+            <label class="setting-label">
+              <input type="checkbox" id="showDropdownToggle" checked>
+              <span class="checkmark"></span>
+              Show autocomplete dropdown
+            </label>
+          </div>
+          <div class="setting-item">
+            <label class="setting-label">
+              <input type="checkbox" id="autoExpandToggle" checked>
+              <span class="checkmark"></span>
+              Auto-expand on exact match
+            </label>
+          </div>
+          <div class="setting-item">
+            <label for="triggerDelaySlider">Trigger delay: <span id="triggerDelayValue">500ms</span></label>
+            <input type="range" id="triggerDelaySlider" min="100" max="2000" step="100" value="500" class="slider">
+          </div>
+        </div>
+        <div class="panel-footer">
+          <button id="signOutBtn" class="btn btn-danger">Sign Out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-links">
+        <a href="#" id="openDashboardBtn">Open Dashboard</a>
+        <a href="#" id="helpBtn">Help</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
