@@ -147,6 +147,32 @@ const Dashboard = ({ session }) => {
     }
   };
 
+  const syncWithExtension = async () => {
+    try {
+      if (session?.access_token) {
+        // Copy token to clipboard as fallback
+        await navigator.clipboard.writeText(session.access_token);
+        
+        // Show instructions
+        toast.success('Token copied! Now go to your TextGrow extension popup and click "Sync" to connect.');
+        
+        // Try to communicate with extension directly
+        if (window.chrome && window.chrome.runtime) {
+          window.chrome.runtime.sendMessage('extension-id', {
+            type: 'save-user-token',
+            token: session.access_token
+          }, () => {
+            if (!window.chrome.runtime.lastError) {
+              toast.success('Extension synced successfully!');
+            }
+          });
+        }
+      }
+    } catch (error) {
+      toast.error('Please copy your authentication manually');
+    }
+  };
+
   const handleSearch = async () => {
     if (!searchQuery.trim()) {
       fetchShortcuts();
