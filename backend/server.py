@@ -222,35 +222,25 @@ async def get_current_user_profile(user_id: str = Depends(get_current_user)):
         raise HTTPException(status_code=400, detail=str(e))
 
 # Shortcut management endpoints
-@api_router.get("/shortcuts", response_model=List[ShortcutWithDetails])
+@api_router.get("/shortcuts", response_model=List[Shortcut])
 async def get_shortcuts(user_id: str = Depends(get_current_user)):
-    """Get all shortcuts for the current user with folder and tag details"""
+    """Get all shortcuts for the current user"""
     try:
         # Get shortcuts
         shortcuts_result = supabase_client.table('shortcuts').select('*').eq('user_id', user_id).execute()
         
-        shortcuts_with_details = []
+        shortcuts = []
         for shortcut in shortcuts_result.data:
-            # Get folders for this shortcut
-            folders_result = supabase_client.rpc('get_shortcut_folders', {'shortcut_id': shortcut['id']}).execute()
-            folders = [Folder(**folder) for folder in (folders_result.data or [])]
-            
-            # Get tags for this shortcut
-            tags_result = supabase_client.rpc('get_shortcut_tags', {'shortcut_id': shortcut['id']}).execute()
-            tags = [Tag(**tag) for tag in (tags_result.data or [])]
-            
-            shortcuts_with_details.append(ShortcutWithDetails(
+            shortcuts.append(Shortcut(
                 id=shortcut['id'],
                 user_id=shortcut['user_id'],
                 trigger=shortcut['trigger'],
                 content=shortcut['content'],
                 created_at=datetime.fromisoformat(shortcut['created_at']),
-                updated_at=datetime.fromisoformat(shortcut['updated_at']),
-                folders=folders,
-                tags=tags
+                updated_at=datetime.fromisoformat(shortcut['updated_at'])
             ))
         
-        return shortcuts_with_details
+        return shortcuts
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
