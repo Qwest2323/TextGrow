@@ -279,7 +279,7 @@ async def update_shortcut(shortcut_id: str, shortcut_data: ShortcutUpdate, user_
     """Update a shortcut"""
     try:
         # Verify ownership
-        existing = supabase_client.table('shortcuts').select('*').eq('id', shortcut_id).eq('user_id', user_id).single().execute()
+        existing = supabase_client.table('text_grow.shortcuts').select('*').eq('id', shortcut_id).eq('user_id', user_id).single().execute()
         if not existing.data:
             raise HTTPException(status_code=404, detail="Shortcut not found")
         
@@ -292,7 +292,7 @@ async def update_shortcut(shortcut_id: str, shortcut_data: ShortcutUpdate, user_
         if shortcut_data.content is not None:
             update_data['content'] = shortcut_data.content
         
-        result = supabase_client.table('shortcuts').update(update_data).eq('id', shortcut_id).execute()
+        result = supabase_client.table('text_grow.shortcuts').update(update_data).eq('id', shortcut_id).execute()
         
         updated_shortcut = result.data[0]
         return Shortcut(
