@@ -28,6 +28,16 @@ supabase_anon: Client = create_client(supabase_url, supabase_anon_key)
 supabase_client.postgrest.schema = "text_grow"
 supabase_anon.postgrest.schema = "text_grow"
 
+# Also set the session headers for the schema
+supabase_client.postgrest.session.headers.update({
+    'Content-Profile': 'text_grow',
+    'Accept-Profile': 'text_grow'
+})
+supabase_anon.postgrest.session.headers.update({
+    'Content-Profile': 'text_grow', 
+    'Accept-Profile': 'text_grow'
+})
+
 # Create the main app
 app = FastAPI(title="TextGrow API", version="1.0.0")
 
