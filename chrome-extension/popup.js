@@ -219,6 +219,56 @@ class TextGrowPopup {
     }
   }
   
+  async handlePasteToken() {
+    try {
+      const tokenInput = document.getElementById('tokenInput');
+      const token = tokenInput?.value?.trim();
+      
+      if (!token) {
+        this.showTemporaryStatus('Please enter a token', 'error');
+        return;
+      }
+      
+      // Validate token format (JWT should have 3 parts separated by dots)
+      const tokenParts = token.split('.');
+      if (tokenParts.length !== 3) {
+        this.showTemporaryStatus('Invalid token format', 'error');
+        return;
+      }
+      
+      // Store token and trigger sync
+      await chrome.storage.local.set({ 'textgrow_user_token': token });
+      
+      // Update authentication state
+      this.isAuthenticated = true;
+      
+      // Trigger immediate sync with backend
+      const syncResult = await this.sendMessage('save-user-token', { token: token });
+      
+      if (syncResult && syncResult.success) {
+        // Reload data after successful authentication
+        await this.loadData();
+        this.updateUI();
+        
+        // Clear the input
+        tokenInput.value = '';
+        
+        this.showTemporaryStatus('Connected successfully!');
+      } else {
+        throw new Error('Failed to authenticate with token');
+      }
+      
+    } catch (error) {
+      console.error('Error pasting token:', error);
+      this.showTemporaryStatus('Authentication failed. Please check your token.', 'error');
+      
+      // Reset authentication state on failure
+      this.isAuthenticated = false;
+      await chrome.storage.local.remove('textgrow_user_token');
+      this.updateUI();
+    }
+  }
+
   async handleSignOut() {
     try {
       await chrome.storage.local.remove(['textgrow_user_token', 'textgrow_shortcuts']);
