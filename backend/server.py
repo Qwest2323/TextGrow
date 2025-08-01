@@ -390,8 +390,6 @@ async def delete_folder(folder_id: str, user_id: str = Depends(get_current_user)
         return {"message": "Folder deleted successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
 
 @api_router.post("/folders", response_model=Folder)
 async def create_folder(folder_data: FolderCreate, user_id: str = Depends(get_current_user)):
