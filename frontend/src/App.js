@@ -15,6 +15,11 @@ function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
+      
+      // Send token to Chrome extension if present
+      if (session?.access_token) {
+        sendTokenToExtension(session.access_token);
+      }
     });
 
     // Listen for auth changes
@@ -22,10 +27,36 @@ function App() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      
+      // Send token to Chrome extension if present
+      if (session?.access_token) {
+        sendTokenToExtension(session.access_token);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const sendTokenToExtension = async (token) => {
+    try {
+      // Check if this page was opened by Chrome extension
+      if (window.chrome && window.chrome.runtime) {
+        // Try to send message to extension
+        window.chrome.runtime.sendMessage('TextGrow Extension ID', {
+          type: 'save-user-token',
+          token: token
+        }, () => {
+          // Ignore errors - extension might not be installed
+          if (window.chrome.runtime.lastError) {
+            console.log('Extension not found, continuing normally');
+          }
+        });
+      }
+    } catch (error) {
+      // Ignore errors - extension might not be installed
+      console.log('Extension communication not available');
+    }
+  };
 
   if (loading) {
     return (
