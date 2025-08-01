@@ -438,6 +438,97 @@ async def get_tags():
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@api_router.put("/tags/{tag_id}", response_model=Tag)
+async def update_tag(tag_id: str, tag_data: TagCreate):
+    """Update a tag"""
+    try:
+        # Check if tag exists
+        existing = supabase_client.table('tags').select('*').eq('id', tag_id).single().execute()
+        if not existing.data:
+            raise HTTPException(status_code=404, detail="Tag not found")
+        
+        update_data = {
+            'name': tag_data.name,
+            'updated_at': datetime.utcnow().isoformat()
+        }
+        
+        result = supabase_client.table('tags').update(update_data).eq('id', tag_id).execute()
+        
+        updated_tag = result.data[0]
+        return Tag(
+            id=updated_tag['id'],
+            name=updated_tag['name'],
+            created_at=datetime.fromisoformat(updated_tag['created_at']),
+            updated_at=datetime.fromisoformat(updated_tag['updated_at'])
+        )
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.delete("/tags/{tag_id}")
+async def delete_tag(tag_id: str):
+    """Delete a tag"""
+    try:
+        # Check if tag exists
+        existing = supabase_client.table('tags').select('*').eq('id', tag_id).single().execute()
+        if not existing.data:
+            raise HTTPException(status_code=404, detail="Tag not found")
+        
+        # Delete tag assignments
+        supabase_client.table('shortcut_tag_assignments').delete().eq('tag_id', tag_id).execute()
+        
+        # Delete tag
+        supabase_client.table('tags').delete().eq('id', tag_id).execute()
+        
+        return {"message": "Tag deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+# Export/Import endpoints
+@api_router.get("/export")
+async def export_shortcuts(user_id: str = Depends(get_current_user)):
+    """Export all user shortcuts"""
+    try:
+        # Get all user data
+        shortcuts_result = supabase_client.table('shortcuts').select('*').eq('user_id', user_id).execute()
+        folders_result = supabase_client.table('folders').select('*').eq('user_id', user_id).execute()
+        
+        export_data = {
+            'version': '1.0',
+            'exported_at': datetime.utcnow().isoformat(),
+            'shortcuts': shortcuts_result.data,
+            'folders': folders_result.data
+        }
+        
+        return export_data
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@api_router.post("/import")
+async def import_shortcuts(import_data: Dict[str, Any], user_id: str = Depends(get_current_user)):
+    """Import shortcuts from exported data"""
+    try:
+        imported_count = 0
+        
+        # Import shortcuts
+        if 'shortcuts' in import_data:
+            for shortcut_data in import_data['shortcuts']:
+                # Create new shortcut with new ID
+                new_shortcut = {
+                    'id': str(uuid.uuid4()),
+                    'user_id': user_id,
+                    'trigger': shortcut_data['trigger'],
+                    'content': shortcut_data['content'],
+                    'created_at': datetime.utcnow().isoformat(),
+                    'updated_at': datetime.utcnow().isoformat()
+                }
+                
+                supabase_client.table('shortcuts').insert(new_shortcut).execute()
+                imported_count += 1
+        
+        return {"imported_count": imported_count}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @api_router.post("/tags", response_model=Tag)
 async def create_tag(tag_data: TagCreate):
     """Create a new tag"""
