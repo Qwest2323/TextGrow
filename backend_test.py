@@ -63,7 +63,7 @@ class TextGrowAPITester:
             
             # If all sign-ins failed, try to create a new user with a unique email
             import time
-            unique_email = f"testuser{int(time.time())}@textgrow.dev"
+            unique_email = f"test{int(time.time())}@example.com"
             test_password = "testpassword123"
             
             print(f"🔐 Creating new test user: {unique_email}...")
