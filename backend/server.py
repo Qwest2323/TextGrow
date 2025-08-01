@@ -294,7 +294,7 @@ async def delete_shortcut(shortcut_id: str, user_id: str = Depends(get_current_u
     """Delete a shortcut"""
     try:
         # Verify ownership
-        existing = supabase_client.table('text_grow.shortcuts').select('*').eq('id', shortcut_id).eq('user_id', user_id).single().execute()
+        existing = supabase_client.table('shortcuts').select('*').eq('id', shortcut_id).eq('user_id', user_id).single().execute()
         if not existing.data:
             raise HTTPException(status_code=404, detail="Shortcut not found")
         
