@@ -382,7 +382,7 @@ async def create_tag(tag_data: TagCreate):
     """Create a new tag"""
     try:
         # Check if tag already exists
-        existing = supabase_client.table('text_grow.tags').select('*').eq('name', tag_data.name).execute()
+        existing = supabase_client.table('tags').select('*').eq('name', tag_data.name).execute()
         if existing.data:
             return Tag(**existing.data[0])
         
