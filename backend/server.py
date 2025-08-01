@@ -228,7 +228,7 @@ async def create_shortcut(shortcut_data: ShortcutCreate, user_id: str = Depends(
     """Create a new shortcut"""
     try:
         # Check shortcut limit (500 per user)
-        count_result = supabase_client.table('text_grow.shortcuts').select('id', count='exact').eq('user_id', user_id).execute()
+        count_result = supabase_client.table('shortcuts').select('id', count='exact').eq('user_id', user_id).execute()
         if count_result.count and count_result.count >= 500:
             raise HTTPException(status_code=400, detail="Maximum shortcut limit (500) reached")
         
