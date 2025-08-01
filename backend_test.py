@@ -31,45 +31,66 @@ class TextGrowAPITester:
             
             self.supabase_client = create_client(supabase_url, supabase_anon_key)
             
-            # Create a test user or sign in with existing test user
-            test_email = "test@textgrow.com"
+            # Try different test users
+            test_users = [
+                ("testuser1@textgrow.dev", "testpassword123"),
+                ("testuser2@textgrow.dev", "testpassword123"),
+                ("testuser3@textgrow.dev", "testpassword123"),
+                ("demo@textgrow.com", "demopassword123")
+            ]
+            
+            for test_email, test_password in test_users:
+                print(f"🔐 Trying authentication for {test_email}...")
+                
+                # Try to sign in first
+                try:
+                    auth_response = self.supabase_client.auth.sign_in_with_password({
+                        "email": test_email,
+                        "password": test_password
+                    })
+                    print("✅ Signed in with existing test user")
+                    
+                    # Get the access token
+                    if auth_response.session and auth_response.session.access_token:
+                        self.auth_token = auth_response.session.access_token
+                        self.headers['Authorization'] = f'Bearer {self.auth_token}'
+                        print(f"✅ Authentication token obtained: {self.auth_token[:20]}...")
+                        return True
+                        
+                except Exception as signin_error:
+                    print(f"⚠️  Sign in failed for {test_email}: {signin_error}")
+                    continue
+            
+            # If all sign-ins failed, try to create a new user with a unique email
+            import time
+            unique_email = f"testuser{int(time.time())}@textgrow.dev"
             test_password = "testpassword123"
             
-            print(f"🔐 Setting up authentication for {test_email}...")
-            
-            # Try to sign in first
+            print(f"🔐 Creating new test user: {unique_email}...")
             try:
-                auth_response = self.supabase_client.auth.sign_in_with_password({
-                    "email": test_email,
-                    "password": test_password
-                })
-                print("✅ Signed in with existing test user")
-            except Exception as signin_error:
-                print(f"⚠️  Sign in failed, trying to create user: {signin_error}")
-                # If sign in fails, try to create the user
-                try:
-                    auth_response = self.supabase_client.auth.sign_up({
-                        "email": test_email,
-                        "password": test_password,
-                        "options": {
-                            "data": {
-                                "name": "Test User"
-                            }
+                auth_response = self.supabase_client.auth.sign_up({
+                    "email": unique_email,
+                    "password": test_password,
+                    "options": {
+                        "data": {
+                            "name": "Test User"
                         }
-                    })
-                    print("✅ Created new test user")
-                except Exception as signup_error:
-                    print(f"❌ Failed to create user: {signup_error}")
+                    }
+                })
+                print("✅ Created new test user")
+                
+                # Get the access token
+                if auth_response.session and auth_response.session.access_token:
+                    self.auth_token = auth_response.session.access_token
+                    self.headers['Authorization'] = f'Bearer {self.auth_token}'
+                    print(f"✅ Authentication token obtained: {self.auth_token[:20]}...")
+                    return True
+                else:
+                    print("❌ No access token received from new user")
                     return False
-            
-            # Get the access token
-            if auth_response.session and auth_response.session.access_token:
-                self.auth_token = auth_response.session.access_token
-                self.headers['Authorization'] = f'Bearer {self.auth_token}'
-                print(f"✅ Authentication token obtained: {self.auth_token[:20]}...")
-                return True
-            else:
-                print("❌ No access token received")
+                    
+            except Exception as signup_error:
+                print(f"❌ Failed to create new user: {signup_error}")
                 return False
                 
         except Exception as e:
