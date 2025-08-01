@@ -147,6 +147,20 @@ const Dashboard = ({ session }) => {
     }
   };
 
+  const copyExtensionToken = async () => {
+    try {
+      if (session?.access_token) {
+        await navigator.clipboard.writeText(session.access_token);
+        toast.success('Extension token copied! Now paste it in your TextGrow extension popup.');
+      } else {
+        toast.error('No authentication token available');
+      }
+    } catch (error) {
+      toast.error('Failed to copy token');
+      console.error('Copy error:', error);
+    }
+  };
+
   const syncWithExtension = async () => {
     try {
       if (session?.access_token) {
