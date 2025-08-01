@@ -445,7 +445,7 @@ async def update_tag(tag_id: str, tag_data: TagCreate):
     """Update a tag"""
     try:
         # Check if tag exists
-        existing = supabase_client.table('tags').select('*').eq('id', tag_id).single().execute()
+        existing = supabase_client.table('text_grow.tags').select('*').eq('id', tag_id).single().execute()
         if not existing.data:
             raise HTTPException(status_code=404, detail="Tag not found")
         
@@ -454,7 +454,7 @@ async def update_tag(tag_id: str, tag_data: TagCreate):
             'updated_at': datetime.utcnow().isoformat()
         }
         
-        result = supabase_client.table('tags').update(update_data).eq('id', tag_id).execute()
+        result = supabase_client.table('text_grow.tags').update(update_data).eq('id', tag_id).execute()
         
         updated_tag = result.data[0]
         return Tag(
