@@ -408,7 +408,7 @@ async def create_folder(folder_data: FolderCreate, user_id: str = Depends(get_cu
             'updated_at': now.isoformat()
         }
         
-        result = supabase_client.table('folders').insert(new_folder).execute()
+        result = supabase_client.table('text_grow.folders').insert(new_folder).execute()
         
         return Folder(
             id=folder_id,
