@@ -152,7 +152,7 @@ async def root():
 async def health_check():
     try:
         # Test Supabase connection
-        result = supabase_client.table('users').select('id').limit(1).execute()
+        result = supabase_client.table('text_grow.users').select('id').limit(1).execute()
         return {"status": "healthy", "database": "connected"}
     except Exception as e:
         return {"status": "unhealthy", "error": str(e)}
