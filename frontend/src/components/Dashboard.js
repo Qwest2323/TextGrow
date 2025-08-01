@@ -297,13 +297,21 @@ const Dashboard = ({ session }) => {
                 <p className="text-sm font-medium text-gray-900">
                   {session?.user?.user_metadata?.name || session?.user?.email}
                 </p>
-                <button
-                  onClick={handleSignOut}
-                  className="flex items-center text-xs text-gray-500 hover:text-gray-700 mt-1"
-                >
-                  <LogOut className="h-3 w-3 mr-1" />
-                  Sign out
-                </button>
+                <div className="flex items-center space-x-2 mt-1">
+                  <button
+                    onClick={handleSignOut}
+                    className="text-xs text-gray-500 hover:text-gray-700"
+                  >
+                    <LogOut className="h-3 w-3 mr-1 inline" />
+                    Sign out
+                  </button>
+                  <button
+                    onClick={copyExtensionToken}
+                    className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                  >
+                    📱 Copy Extension Token
+                  </button>
+                </div>
               </div>
             )}
           </div>
