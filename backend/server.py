@@ -20,12 +20,13 @@ supabase_url = os.environ['SUPABASE_URL']
 supabase_anon_key = os.environ['SUPABASE_ANON_KEY'] 
 supabase_service_key = os.environ['SUPABASE_SERVICE_KEY']
 
-# Create Supabase clients with schema configuration
-from supabase.client import ClientOptions
+# Create Supabase clients
+supabase_client: Client = create_client(supabase_url, supabase_service_key)
+supabase_anon: Client = create_client(supabase_url, supabase_anon_key)
 
-client_options = ClientOptions(schema="text_grow")
-supabase_client: Client = create_client(supabase_url, supabase_service_key, client_options)
-supabase_anon: Client = create_client(supabase_url, supabase_anon_key, client_options)
+# Configure clients to use text_grow schema
+supabase_client.postgrest.schema = "text_grow"
+supabase_anon.postgrest.schema = "text_grow"
 
 # Create the main app
 app = FastAPI(title="TextGrow API", version="1.0.0")
