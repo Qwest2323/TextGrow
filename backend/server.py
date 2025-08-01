@@ -173,7 +173,7 @@ async def signup(user_data: UserCreate):
 async def get_current_user_profile(user_id: str = Depends(get_current_user)):
     """Get current user profile"""
     try:
-        result = supabase_client.table('text_grow.users').select('*').eq('id', user_id).single().execute()
+        result = supabase_client.table('users').select('*').eq('id', user_id).single().execute()
         if not result.data:
             raise HTTPException(status_code=404, detail="User not found")
         
