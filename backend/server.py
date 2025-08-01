@@ -396,7 +396,7 @@ async def create_tag(tag_data: TagCreate):
             'updated_at': now.isoformat()
         }
         
-        result = supabase_client.table('text_grow.tags').insert(new_tag).execute()
+        result = supabase_client.table('tags').insert(new_tag).execute()
         
         return Tag(
             id=tag_id,
