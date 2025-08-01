@@ -1,14 +1,16 @@
 import requests
 import sys
 import json
+import os
 from datetime import datetime
+from supabase import create_client, Client
 
 class TextGrowAPITester:
     def __init__(self, base_url="https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.headers = {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer mock-token'  # Mock auth token for development
+            'Authorization': 'Bearer mock-token'  # Will be updated with real token
         }
         self.tests_run = 0
         self.tests_passed = 0
@@ -17,6 +19,8 @@ class TextGrowAPITester:
             'folders': [],
             'tags': []
         }
+        self.supabase_client = None
+        self.auth_token = None
 
     def run_test(self, name, method, endpoint, expected_status, data=None, check_response=None):
         """Run a single API test"""
