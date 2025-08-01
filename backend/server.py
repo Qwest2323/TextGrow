@@ -275,7 +275,7 @@ async def update_shortcut(shortcut_id: str, shortcut_data: ShortcutUpdate, user_
         if shortcut_data.content is not None:
             update_data['content'] = shortcut_data.content
         
-        result = supabase_client.table('text_grow.shortcuts').update(update_data).eq('id', shortcut_id).execute()
+        result = supabase_client.table('shortcuts').update(update_data).eq('id', shortcut_id).execute()
         
         updated_shortcut = result.data[0]
         return Shortcut(
