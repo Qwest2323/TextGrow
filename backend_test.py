@@ -545,7 +545,10 @@ def main():
     print("FINAL TEST RESULTS")
     print("="*60)
     print(f"📊 Tests passed: {tester.tests_passed}/{tester.tests_run}")
-    print(f"✅ Success rate: {(tester.tests_passed/tester.tests_run)*100:.1f}%")
+    if tester.tests_run > 0:
+        print(f"✅ Success rate: {(tester.tests_passed/tester.tests_run)*100:.1f}%")
+    else:
+        print("✅ Success rate: 0.0%")
     
     if success and tester.tests_passed == tester.tests_run:
         print("🎉 All tests passed!")
