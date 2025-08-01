@@ -244,7 +244,7 @@ async def create_shortcut(shortcut_data: ShortcutCreate, user_id: str = Depends(
             'updated_at': now.isoformat()
         }
         
-        result = supabase_client.table('text_grow.shortcuts').insert(new_shortcut).execute()
+        result = supabase_client.table('shortcuts').insert(new_shortcut).execute()
         
         return Shortcut(
             id=shortcut_id,
