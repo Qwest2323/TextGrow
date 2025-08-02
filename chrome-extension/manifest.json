@@ -12,7 +12,7 @@
   
   "host_permissions": [
     "https://lkpdmllkksgybuwipkjf.supabase.co/*",
-    "https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com/*"
+    "http://localhost:3000/*"
   ],
   
   "background": {
@@ -30,26 +30,20 @@
   
   "action": {
     "default_popup": "popup.html",
-    "default_title": "TextGrow",
-    "default_icon": {
-      "16": "icons/icon16.png",
-      "32": "icons/icon32.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
-    }
-  },
-  
-  "icons": {
-    "16": "icons/icon16.png",
-    "32": "icons/icon32.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "default_title": "TextGrow"
   },
   
   "web_accessible_resources": [
     {
-      "resources": ["dropdown.html", "styles.css"],
+      "resources": ["styles.css"],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  
+  "externally_connectable": {
+    "matches": [
+      "http://localhost:3000/*",
+      "https://lkpdmllkksgybuwipkjf.supabase.co/*"
+    ]
+  }
 }

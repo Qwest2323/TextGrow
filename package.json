@@ -1,0 +1,31 @@
+{
+  "name": "textgrow-monorepo",
+  "version": "1.0.0",
+  "description": "TextGrow - A comprehensive text expansion tool for Chrome and Android",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "chrome-extension"
+  ],
+  "scripts": {
+    "dev:frontend": "cd frontend && npm run start",
+    "dev:extension": "cd chrome-extension && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "build:extension": "cd chrome-extension && npm run build",
+    "build:all": "npm run build:frontend && npm run build:extension",
+    "test": "cd frontend && npm run test",
+    "lint": "cd frontend && npm run lint && cd ../chrome-extension && npm run lint",
+    "format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,md}'"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0",
+    "concurrently": "^8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/textgrow.git"
+  },
+  "keywords": ["text-expansion", "chrome-extension", "pwa", "productivity", "shortcuts"],
+  "author": "Your Name",
+  "license": "MIT"
+}

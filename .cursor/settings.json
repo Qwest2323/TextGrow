@@ -1,0 +1,25 @@
+{
+  "typescript.preferences.quoteStyle": "single",
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/build": true,
+    "**/dist": true,
+    "**/.emergent": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/build": true,
+    "**/dist": true,
+    "**/.emergent": true,
+    "**/yarn.lock": true,
+    "**/package-lock.json": true
+  },
+  "emmet.includeLanguages": {
+    "javascript": "javascriptreact"
+  }
+}

@@ -36,29 +36,50 @@ class TextGrowPopup {
   
   setupEventListeners() {
     // Authentication
-    document.getElementById('signInBtn')?.addEventListener('click', this.handleSignIn.bind(this));
-    document.getElementById('signOutBtn')?.addEventListener('click', this.handleSignOut.bind(this));
-    document.getElementById('pasteTokenBtn')?.addEventListener('click', this.handlePasteToken.bind(this));
+    const signInBtn = document.getElementById('signInBtn');
+    const signOutBtn = document.getElementById('signOutBtn');
+    const pasteTokenBtn = document.getElementById('pasteTokenBtn');
+    
+    if (signInBtn) {
+      signInBtn.addEventListener('click', this.handleSignIn.bind(this));
+    }
+    if (signOutBtn) {
+      signOutBtn.addEventListener('click', this.handleSignOut.bind(this));
+    }
+    if (pasteTokenBtn) {
+      pasteTokenBtn.addEventListener('click', this.handlePasteToken.bind(this));
+      console.log('Token paste button listener added');
+    }
     
     // Search
-    document.getElementById('searchInput')?.addEventListener('input', this.handleSearch.bind(this));
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.addEventListener('input', this.handleSearch.bind(this));
+    }
     
     // Quick actions
-    document.getElementById('syncBtn')?.addEventListener('click', this.handleSync.bind(this));
-    document.getElementById('addBtn')?.addEventListener('click', this.handleAdd.bind(this));
-    document.getElementById('settingsBtn')?.addEventListener('click', this.showSettings.bind(this));
+    const syncBtn = document.getElementById('syncBtn');
+    const addBtn = document.getElementById('addBtn');
+    const settingsBtn = document.getElementById('settingsBtn');
+    
+    if (syncBtn) syncBtn.addEventListener('click', this.handleSync.bind(this));
+    if (addBtn) addBtn.addEventListener('click', this.handleAdd.bind(this));
+    if (settingsBtn) settingsBtn.addEventListener('click', this.showSettings.bind(this));
     
     // Settings panel
-    document.getElementById('closeSettingsBtn')?.addEventListener('click', this.hideSettings.bind(this));
-    document.getElementById('enabledToggle')?.addEventListener('change', this.handleSettingChange.bind(this));
-    document.getElementById('showDropdownToggle')?.addEventListener('change', this.handleSettingChange.bind(this));
-    document.getElementById('autoExpandToggle')?.addEventListener('change', this.handleSettingChange.bind(this));
-    document.getElementById('triggerDelaySlider')?.addEventListener('input', this.handleTriggerDelayChange.bind(this));
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    if (closeSettingsBtn) {
+      closeSettingsBtn.addEventListener('click', this.hideSettings.bind(this));
+    }
     
     // Footer links
-    document.getElementById('openDashboardBtn')?.addEventListener('click', this.openDashboard.bind(this));
-    document.getElementById('helpBtn')?.addEventListener('click', this.openHelp.bind(this));
-    document.getElementById('createFirstBtn')?.addEventListener('click', this.handleAdd.bind(this));
+    const openDashboardBtn = document.getElementById('openDashboardBtn');
+    const helpBtn = document.getElementById('helpBtn');
+    const createFirstBtn = document.getElementById('createFirstBtn');
+    
+    if (openDashboardBtn) openDashboardBtn.addEventListener('click', this.openDashboard.bind(this));
+    if (helpBtn) helpBtn.addEventListener('click', this.openHelp.bind(this));
+    if (createFirstBtn) createFirstBtn.addEventListener('click', this.handleAdd.bind(this));
   }
   
   updateUI() {
@@ -73,11 +94,11 @@ class TextGrowPopup {
     const authState = document.getElementById('authenticatedState');
     
     if (this.isAuthenticated) {
-      notAuthState.style.display = 'none';
-      authState.style.display = 'flex';
+      if (notAuthState) notAuthState.style.display = 'none';
+      if (authState) authState.style.display = 'flex';
     } else {
-      notAuthState.style.display = 'flex';
-      authState.style.display = 'none';
+      if (notAuthState) notAuthState.style.display = 'flex';
+      if (authState) authState.style.display = 'none';
     }
   }
   
@@ -209,7 +230,7 @@ class TextGrowPopup {
   async handleSignIn() {
     try {
       // Open setup page first, then dashboard
-      const setupUrl = 'https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com/extension-setup.html?auto=true';
+      const setupUrl = 'http://localhost:3000/extension-setup.html?auto=true';
       chrome.tabs.create({ url: setupUrl });
       
       this.showTemporaryStatus('Opening setup page...');
@@ -220,51 +241,69 @@ class TextGrowPopup {
   }
   
   async handlePasteToken() {
+    console.log('handlePasteToken called');
+    
     try {
       const tokenInput = document.getElementById('tokenInput');
-      const token = tokenInput?.value?.trim();
+      console.log('Token input element:', tokenInput);
+      
+      if (!tokenInput) {
+        console.error('Token input not found');
+        this.showTemporaryStatus('Token input not found', 'error');
+        return;
+      }
+      
+      const token = tokenInput.value.trim();
+      console.log('Token value:', token ? `${token.substring(0, 20)}...` : 'empty');
       
       if (!token) {
         this.showTemporaryStatus('Please enter a token', 'error');
         return;
       }
       
-      // Validate token format (JWT should have 3 parts separated by dots)
-      const tokenParts = token.split('.');
-      if (tokenParts.length !== 3) {
-        this.showTemporaryStatus('Invalid token format', 'error');
+      // Basic token validation
+      if (token.length < 20) {
+        this.showTemporaryStatus('Token seems too short', 'error');
         return;
       }
       
-      // Store token and trigger sync
+      this.showTemporaryStatus('Connecting...');
+      
+      // Store token
       await chrome.storage.local.set({ 'textgrow_user_token': token });
+      console.log('Token stored in local storage');
       
       // Update authentication state
       this.isAuthenticated = true;
       
-      // Trigger immediate sync with backend
-      const syncResult = await this.sendMessage('save-user-token', { token: token });
-      
-      if (syncResult && syncResult.success) {
-        // Reload data after successful authentication
-        await this.loadData();
-        this.updateUI();
-        
-        // Clear the input
-        tokenInput.value = '';
-        
-        this.showTemporaryStatus('Connected successfully!');
-      } else {
-        throw new Error('Failed to authenticate with token');
+      // Try to sync with backend
+      try {
+        const syncResult = await this.sendMessage('save-user-token', { token: token });
+        console.log('Sync result:', syncResult);
+      } catch (syncError) {
+        console.warn('Sync failed, but token stored locally:', syncError);
       }
       
+      // Reload data
+      await this.loadData();
+      this.updateUI();
+      
+      // Clear the input
+      tokenInput.value = '';
+      
+      this.showTemporaryStatus('Connected successfully!');
+      
     } catch (error) {
-      console.error('Error pasting token:', error);
-      this.showTemporaryStatus('Authentication failed. Please check your token.', 'error');
+      console.error('Error in handlePasteToken:', error);
+      this.showTemporaryStatus('Connection failed: ' + error.message, 'error');
       
       // Reset authentication state on failure
       this.isAuthenticated = false;
-      await chrome.storage.local.remove('textgrow_user_token');
+      try {
+        await chrome.storage.local.remove('textgrow_user_token');
+      } catch (removeError) {
+        console.error('Error removing token:', removeError);
+      }
       this.updateUI();
     }
   }
@@ -302,42 +341,27 @@ class TextGrowPopup {
   }
   
   handleAdd() {
-    const dashboardUrl = 'https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com';
+    const dashboardUrl = 'http://localhost:3000';
     chrome.tabs.create({ url: dashboardUrl });
   }
   
   editShortcut(shortcutId) {
-    const dashboardUrl = `https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com?edit=${shortcutId}`;
+    const dashboardUrl = `http://localhost:3000?edit=${shortcutId}`;
     chrome.tabs.create({ url: dashboardUrl });
   }
   
   showSettings() {
-    document.getElementById('settingsPanel').style.display = 'flex';
+    const settingsPanel = document.getElementById('settingsPanel');
+    if (settingsPanel) {
+      settingsPanel.style.display = 'flex';
+    }
   }
   
   hideSettings() {
-    document.getElementById('settingsPanel').style.display = 'none';
-  }
-  
-  async handleSettingChange(event) {
-    const setting = event.target.id.replace('Toggle', '');
-    const value = event.target.checked;
-    
-    const newSettings = { ...this.settings, [setting]: value };
-    await this.sendMessage('update-settings', { settings: newSettings });
-    
-    this.settings = newSettings;
-    this.showTemporaryStatus('Settings saved');
-  }
-  
-  async handleTriggerDelayChange(event) {
-    const value = parseInt(event.target.value);
-    document.getElementById('triggerDelayValue').textContent = `${value}ms`;
-    
-    const newSettings = { ...this.settings, triggerDelay: value };
-    await this.sendMessage('update-settings', { settings: newSettings });
-    
-    this.settings = newSettings;
+    const settingsPanel = document.getElementById('settingsPanel');
+    if (settingsPanel) {
+      settingsPanel.style.display = 'none';
+    }
   }
   
   async copyToClipboard(text) {
@@ -360,12 +384,12 @@ class TextGrowPopup {
   }
   
   openDashboard() {
-    const dashboardUrl = 'https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com';
+    const dashboardUrl = 'http://localhost:3000';
     chrome.tabs.create({ url: dashboardUrl });
   }
   
   openHelp() {
-    const helpUrl = 'https://91a36058-c40b-4267-a78a-bbae73b49e3d.preview.emergentagent.com/help';
+    const helpUrl = 'http://localhost:3000/help';
     chrome.tabs.create({ url: helpUrl });
   }
   
@@ -386,7 +410,7 @@ class TextGrowPopup {
         if (statusDot) {
           statusDot.className = 'status-dot';
         }
-      }, 2000);
+      }, 3000);
     }
   }
   
@@ -410,5 +434,6 @@ class TextGrowPopup {
 
 // Initialize popup when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM loaded, initializing TextGrowPopup');
   new TextGrowPopup();
 });

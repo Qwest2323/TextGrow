@@ -16,14 +16,10 @@ class TextGrowExpander {
   }
   
   async init() {
-    // Load initial data
     await this.loadShortcuts();
     await this.loadSettings();
-    
-    // Set up event listeners
     this.setupEventListeners();
     this.setupMessageListener();
-    
     console.log(`TextGrow initialized with ${this.shortcuts.length} shortcuts`);
   }
   
@@ -31,6 +27,7 @@ class TextGrowExpander {
     try {
       const shortcuts = await this.sendMessage('get-shortcuts');
       this.shortcuts = shortcuts || [];
+      console.log('Content script loaded shortcuts:', this.shortcuts);
     } catch (error) {
       console.error('Error loading shortcuts:', error);
     }
@@ -47,18 +44,10 @@ class TextGrowExpander {
   }
   
   setupEventListeners() {
-    // Listen for input events on all text inputs
     document.addEventListener('input', this.handleInput.bind(this), true);
     document.addEventListener('keydown', this.handleKeyDown.bind(this), true);
     document.addEventListener('click', this.handleClick.bind(this), true);
     document.addEventListener('blur', this.handleBlur.bind(this), true);
-    
-    // Handle dynamic content
-    const observer = new MutationObserver(this.handleDOMChanges.bind(this));
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
   }
   
   setupMessageListener() {
@@ -87,12 +76,10 @@ class TextGrowExpander {
     
     this.currentElement = event.target;
     
-    // Clear previous timer
     if (this.typingTimer) {
       clearTimeout(this.typingTimer);
     }
     
-    // Set new timer
     this.typingTimer = setTimeout(() => {
       this.checkForShortcuts();
     }, this.settings.triggerDelay || 500);
@@ -135,27 +122,11 @@ class TextGrowExpander {
   }
   
   handleBlur(event) {
-    // Delay hiding dropdown to allow for clicks
     setTimeout(() => {
       if (event.target === this.currentElement) {
         this.hideDropdown();
       }
     }, 200);
-  }
-  
-  handleDOMChanges(mutations) {
-    // Handle dynamically added elements
-    mutations.forEach(mutation => {
-      mutation.addedNodes.forEach(node => {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          // Re-attach listeners to new text inputs
-          const textInputs = node.querySelectorAll('input[type="text"], input[type="email"], textarea, [contenteditable="true"]');
-          textInputs.forEach(input => {
-            // Event listeners are already attached globally
-          });
-        }
-      });
-    });
   }
   
   isTextInput(element) {
@@ -164,17 +135,14 @@ class TextGrowExpander {
     const tagName = element.tagName.toLowerCase();
     const type = element.type?.toLowerCase();
     
-    // Check for standard input types
     if (tagName === 'input' && ['text', 'email', 'search', 'url', 'tel'].includes(type)) {
       return true;
     }
     
-    // Check for textarea
     if (tagName === 'textarea') {
       return true;
     }
     
-    // Check for contenteditable
     if (element.contentEditable === 'true') {
       return true;
     }
@@ -184,6 +152,7 @@ class TextGrowExpander {
   
   checkForShortcuts() {
     if (!this.currentElement || !this.shortcuts.length) {
+      console.log('No element or shortcuts:', this.currentElement, this.shortcuts.length);
       return;
     }
     
@@ -191,25 +160,29 @@ class TextGrowExpander {
     const words = text.split(/\s+/);
     const lastWord = words[words.length - 1];
     
+    console.log('Checking shortcuts for:', lastWord, 'Available shortcuts:', this.shortcuts.map(s => s.trigger));
+    
     if (!lastWord) {
       this.hideDropdown();
       return;
     }
     
-    // Find matching shortcuts
     this.matchedShortcuts = this.shortcuts.filter(shortcut => 
       shortcut.trigger.toLowerCase().startsWith(lastWord.toLowerCase())
     );
     
+    console.log('Matched shortcuts:', this.matchedShortcuts);
+    
     if (this.matchedShortcuts.length > 0) {
-      // Check for exact match
       const exactMatch = this.matchedShortcuts.find(shortcut => 
         shortcut.trigger.toLowerCase() === lastWord.toLowerCase()
       );
       
       if (exactMatch && this.settings.autoExpand) {
+        console.log('Auto-expanding:', exactMatch);
         this.expandShortcut(exactMatch);
       } else if (this.settings.showDropdown) {
+        console.log('Showing dropdown for:', this.matchedShortcuts);
         this.showDropdown();
       }
     } else {
@@ -236,7 +209,6 @@ class TextGrowExpander {
       this.currentElement.value = text;
     }
     
-    // Trigger input event
     const event = new Event('input', { bubbles: true });
     this.currentElement.dispatchEvent(event);
   }
@@ -247,14 +219,12 @@ class TextGrowExpander {
     const currentText = this.getInputText();
     const words = currentText.split(/\s+/);
     
-    // Replace the last word (trigger) with the expanded content
     words[words.length - 1] = shortcut.content;
     const newText = words.join(' ');
     
     this.setInputText(newText);
     this.hideDropdown();
     
-    // Focus and set cursor to end
     this.currentElement.focus();
     if (this.currentElement.setSelectionRange) {
       const length = newText.length;
@@ -267,20 +237,14 @@ class TextGrowExpander {
   showDropdown() {
     if (!this.matchedShortcuts.length || !this.currentElement) return;
     
-    this.hideDropdown(); // Remove existing dropdown
+    this.hideDropdown();
     
-    // Create dropdown element
     this.dropdownElement = document.createElement('div');
     this.dropdownElement.className = 'textgrow-dropdown';
     this.dropdownElement.innerHTML = this.generateDropdownHTML();
     
-    // Position dropdown
     this.positionDropdown();
-    
-    // Add to DOM
     document.body.appendChild(this.dropdownElement);
-    
-    // Add event listeners
     this.addDropdownListeners();
     
     this.selectedIndex = 0;
@@ -379,7 +343,7 @@ class TextGrowExpander {
   }
 }
 
-// Initialize TextGrow when DOM is ready
+// Initialize TextGrow
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     new TextGrowExpander();

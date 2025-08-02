@@ -39,22 +39,29 @@ function App() {
 
   const sendTokenToExtension = async (token) => {
     try {
-      // Check if this page was opened by Chrome extension
+      // Store token in localStorage for extension setup page
+      localStorage.setItem('textgrow_auth_token', token);
+      console.log('Token stored in localStorage for extension access');
+      
+      // Also try direct extension communication if available
       if (window.chrome && window.chrome.runtime) {
+        // Get the extension ID from manifest
+        const extensionId = chrome.runtime.id;
+        
         // Try to send message to extension
-        window.chrome.runtime.sendMessage('TextGrow Extension ID', {
+        chrome.runtime.sendMessage(extensionId, {
           type: 'save-user-token',
           token: token
-        }, () => {
-          // Ignore errors - extension might not be installed
-          if (window.chrome.runtime.lastError) {
-            console.log('Extension not found, continuing normally');
+        }, (response) => {
+          if (chrome.runtime.lastError) {
+            console.log('Direct extension communication failed:', chrome.runtime.lastError.message);
+          } else {
+            console.log('Token sent to extension successfully:', response);
           }
         });
       }
     } catch (error) {
-      // Ignore errors - extension might not be installed
-      console.log('Extension communication not available');
+      console.log('Extension communication error:', error);
     }
   };
 

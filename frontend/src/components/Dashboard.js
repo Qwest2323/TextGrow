@@ -15,7 +15,7 @@ import {
   Share2
 } from 'lucide-react';
 import ShortcutList from './ShortcutList';
-import ShortcutForm from './ShortcutForm';
+import SimpleShortcutForm from './SimpleShortcutForm';
 import FolderManager from './FolderManager';
 import TagManager from './TagManager';
 import ShareManager from './ShareManager';
@@ -60,27 +60,24 @@ const Dashboard = ({ session }) => {
 
   const fetchShortcuts = async () => {
     try {
-      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-      const token = session?.access_token;
-      
-      if (!token) {
-        console.error('No access token available');
+      if (!session?.user?.id) {
+        console.error('No user session available');
         return;
       }
       
-      const response = await fetch(`${BACKEND_URL}/api/shortcuts`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // Fetch shortcuts from Supabase
+      const { data, error } = await supabase
+        .from('shortcuts')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch shortcuts: ${response.status}`);
+      if (error) {
+        throw error;
       }
 
-      const data = await response.json();
-      setShortcuts(data);
+      console.log('Fetched shortcuts:', data);
+      setShortcuts(data || []);
     } catch (error) {
       console.error('Error fetching shortcuts:', error);
       throw error;
@@ -89,27 +86,24 @@ const Dashboard = ({ session }) => {
 
   const fetchFolders = async () => {
     try {
-      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-      const token = session?.access_token;
-      
-      if (!token) {
-        console.error('No access token available');
+      if (!session?.user?.id) {
+        console.error('No user session available');
         return;
       }
       
-      const response = await fetch(`${BACKEND_URL}/api/folders`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // Fetch folders from Supabase
+      const { data, error } = await supabase
+        .from('folders')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch folders: ${response.status}`);
+      if (error) {
+        throw error;
       }
 
-      const data = await response.json();
-      setFolders(data);
+      console.log('Fetched folders:', data);
+      setFolders(data || []);
     } catch (error) {
       console.error('Error fetching folders:', error);
       throw error;
@@ -118,20 +112,18 @@ const Dashboard = ({ session }) => {
 
   const fetchTags = async () => {
     try {
-      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-      
-      const response = await fetch(`${BACKEND_URL}/api/tags`, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
+      // Fetch all tags from Supabase (tags are global)
+      const { data, error } = await supabase
+        .from('tags')
+        .select('*')
+        .order('name', { ascending: true });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch tags: ${response.status}`);
+      if (error) {
+        throw error;
       }
 
-      const data = await response.json();
-      setTags(data);
+      console.log('Fetched tags:', data);
+      setTags(data || []);
     } catch (error) {
       console.error('Error fetching tags:', error);
       throw error;
@@ -195,6 +187,41 @@ const Dashboard = ({ session }) => {
         }
       }
     } catch (error) {
+      toast.error('Failed to sync with extension');
+      console.error('Sync error:', error);
+    }
+  };
+
+  const createTestShortcut = async () => {
+    try {
+      if (!session?.user?.id) {
+        toast.error('No user session available');
+        return;
+      }
+
+      const testShortcut = {
+        trigger: '@test',
+        content: 'Hello from TextGrow Dashboard!',
+        user_id: session.user.id
+      };
+
+      const { data, error } = await supabase
+        .from('shortcuts')
+        .insert([testShortcut])
+        .select();
+
+      if (error) {
+        throw error;
+      }
+
+      console.log('Created test shortcut:', data);
+      toast.success('Test shortcut created! Refresh shortcuts to see it.');
+      
+      // Refresh shortcuts list
+      await fetchShortcuts();
+    } catch (error) {
+      console.error('Error creating test shortcut:', error);
+      toast.error('Failed to create test shortcut: ' + error.message);
       toast.error('Please copy your authentication manually');
     }
   };
@@ -369,13 +396,21 @@ const Dashboard = ({ session }) => {
               </button>
             </div>
             
-            <button
-              onClick={() => setShowShortcutForm(true)}
-              className="btn-primary flex items-center"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              New Shortcut
-            </button>
+            <div className="flex space-x-2">
+              <button
+                onClick={createTestShortcut}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center"
+              >
+                🧪 Create Test Shortcut
+              </button>
+              <button
+                onClick={() => setShowShortcutForm(true)}
+                className="btn-primary flex items-center"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                New Shortcut
+              </button>
+            </div>
           </div>
 
           {/* Filters */}
@@ -459,10 +494,7 @@ const Dashboard = ({ session }) => {
 
       {/* Shortcut Form Modal */}
       {showShortcutForm && (
-        <ShortcutForm
-          shortcut={editingShortcut}
-          folders={folders}
-          tags={tags}
+        <SimpleShortcutForm
           onClose={() => {
             setShowShortcutForm(false);
             setEditingShortcut(null);
