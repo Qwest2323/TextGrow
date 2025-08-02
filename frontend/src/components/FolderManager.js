@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { supabase } from '../supabaseClient';
 import toast from 'react-hot-toast';
 import { Plus, Folder, Edit3, Trash2, X, Save } from 'lucide-react';
 
@@ -16,30 +17,37 @@ const FolderManager = ({ folders, onRefresh, session }) => {
       return;
     }
 
+    if (!session?.user?.id) {
+      toast.error('User session not found');
+      return;
+    }
+
     try {
       setLoading(true);
-      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-      const token = session?.access_token;
 
-      const method = editingFolder ? 'PUT' : 'POST';
-      const url = editingFolder 
-        ? `${BACKEND_URL}/api/folders/${editingFolder.id}`
-        : `${BACKEND_URL}/api/folders`;
+      if (editingFolder) {
+        // Update existing folder
+        const { error } = await supabase
+          .from('folders')
+          .update({ name: folderName.trim() })
+          .eq('id', editingFolder.id);
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ name: folderName })
-      });
+        if (error) throw error;
+        toast.success('Folder updated successfully');
+      } else {
+        // Create new folder
+        const { data, error } = await supabase
+          .from('folders')
+          .insert([{
+            name: folderName.trim(),
+            user_id: session.user.id
+          }])
+          .select();
 
-      if (!response.ok) {
-        throw new Error(`Failed to ${editingFolder ? 'update' : 'create'} folder`);
+        if (error) throw error;
+        toast.success('Folder created successfully');
       }
 
-      toast.success(`Folder ${editingFolder ? 'updated' : 'created'} successfully`);
       setFolderName('');
       setShowForm(false);
       setEditingFolder(null);
@@ -64,20 +72,12 @@ const FolderManager = ({ folders, onRefresh, session }) => {
     }
 
     try {
-      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-      const token = session?.access_token;
+      const { error } = await supabase
+        .from('folders')
+        .delete()
+        .eq('id', folderId);
 
-      const response = await fetch(`${BACKEND_URL}/api/folders/${folderId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete folder');
-      }
+      if (error) throw error;
 
       toast.success('Folder deleted successfully');
       onRefresh();

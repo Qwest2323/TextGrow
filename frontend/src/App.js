@@ -82,11 +82,7 @@ function App() {
             element={session ? <Navigate to="/" replace /> : <Auth />} 
           />
           <Route 
-            path="/" 
-            element={session ? <Dashboard session={session} /> : <Navigate to="/auth" replace />} 
-          />
-          <Route 
-            path="/dashboard/*" 
+            path="/*" 
             element={session ? <Dashboard session={session} /> : <Navigate to="/auth" replace />} 
           />
         </Routes>

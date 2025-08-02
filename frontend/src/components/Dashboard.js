@@ -65,7 +65,7 @@ const Dashboard = ({ session }) => {
         return;
       }
       
-      // Fetch shortcuts from Supabase
+      // Fetch shortcuts first
       const { data, error } = await supabase
         .from('shortcuts')
         .select('*')
@@ -76,11 +76,60 @@ const Dashboard = ({ session }) => {
         throw error;
       }
 
-      console.log('Fetched shortcuts:', data);
-      setShortcuts(data || []);
+      // Now fetch tags for each shortcut using the junction table
+      let transformedShortcuts = [];
+      
+      for (const shortcut of data || []) {
+        try {
+          // Fetch tags for this shortcut
+          const { data: tagData, error: tagError } = await supabase
+            .from('shortcut_tags')
+            .select(`
+              tags(id, name)
+            `)
+            .eq('shortcut_id', shortcut.id);
+
+          const tags = tagError ? [] : (tagData?.map(st => st.tags).filter(Boolean) || []);
+          
+          transformedShortcuts.push({
+            ...shortcut,
+            folders: [], // For now, don't try to fetch folder relationships
+            tags: tags
+          });
+        } catch (err) {
+          // If tag fetching fails, just add the shortcut without tags
+          transformedShortcuts.push({
+            ...shortcut,
+            folders: [],
+            tags: []
+          });
+        }
+      }
+
+      console.log('Fetched shortcuts:', transformedShortcuts);
+      setShortcuts(transformedShortcuts);
     } catch (error) {
       console.error('Error fetching shortcuts:', error);
-      throw error;
+      // If the join fails, fallback to simple fetch
+      try {
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('shortcuts')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false });
+
+        if (fallbackError) throw fallbackError;
+        
+        const shortcuts = fallbackData?.map(shortcut => ({
+          ...shortcut,
+          folders: [],
+          tags: []
+        })) || [];
+        
+        setShortcuts(shortcuts);
+      } catch (fallbackError) {
+        throw fallbackError;
+      }
     }
   };
 
@@ -192,73 +241,44 @@ const Dashboard = ({ session }) => {
     }
   };
 
-  const createTestShortcut = async () => {
+  const handleSearch = async () => {
     try {
+      if (!searchQuery.trim()) {
+        // If empty search, fetch all shortcuts
+        await fetchShortcuts();
+        return;
+      }
+
       if (!session?.user?.id) {
         toast.error('No user session available');
         return;
       }
 
-      const testShortcut = {
-        trigger: '@test',
-        content: 'Hello from TextGrow Dashboard!',
-        user_id: session.user.id
-      };
-
+      setLoading(true);
+      
+      // Search shortcuts by trigger or content
       const { data, error } = await supabase
         .from('shortcuts')
-        .insert([testShortcut])
-        .select();
+        .select('*')
+        .eq('user_id', session.user.id)
+        .or(`trigger.ilike.%${searchQuery}%,content.ilike.%${searchQuery}%`)
+        .order('created_at', { ascending: false });
 
       if (error) {
         throw error;
       }
 
-      console.log('Created test shortcut:', data);
-      toast.success('Test shortcut created! Refresh shortcuts to see it.');
+      setShortcuts(data || []);
+      console.log(`Search found ${data?.length || 0} shortcuts for "${searchQuery}"`);
       
-      // Refresh shortcuts list
-      await fetchShortcuts();
     } catch (error) {
-      console.error('Error creating test shortcut:', error);
-      toast.error('Failed to create test shortcut: ' + error.message);
-      toast.error('Please copy your authentication manually');
+      console.error('Error searching shortcuts:', error);
+      toast.error('Search failed: ' + error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) {
-      fetchShortcuts();
-      return;
-    }
-
-    try {
-      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-      const token = session?.access_token;
-      
-      if (!token) {
-        console.error('No access token available');
-        return;
-      }
-      
-      const response = await fetch(`${BACKEND_URL}/api/search?q=${encodeURIComponent(searchQuery)}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`Search failed: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setShortcuts(data);
-    } catch (error) {
-      toast.error('Search failed');
-      console.error('Search error:', error);
-    }
-  };
 
   const filteredShortcuts = shortcuts.filter(shortcut => {
     if (selectedFolder && !shortcut.folders.some(f => f.id === selectedFolder)) {
@@ -396,21 +416,13 @@ const Dashboard = ({ session }) => {
               </button>
             </div>
             
-            <div className="flex space-x-2">
-              <button
-                onClick={createTestShortcut}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center"
-              >
-                🧪 Create Test Shortcut
-              </button>
-              <button
-                onClick={() => setShowShortcutForm(true)}
-                className="btn-primary flex items-center"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                New Shortcut
-              </button>
-            </div>
+            <button
+              onClick={() => setShowShortcutForm(true)}
+              className="btn-primary flex items-center"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              New Shortcut
+            </button>
           </div>
 
           {/* Filters */}
@@ -495,6 +507,7 @@ const Dashboard = ({ session }) => {
       {/* Shortcut Form Modal */}
       {showShortcutForm && (
         <SimpleShortcutForm
+          editingShortcut={editingShortcut}
           onClose={() => {
             setShowShortcutForm(false);
             setEditingShortcut(null);

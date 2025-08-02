@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { supabase } from '../supabaseClient';
 import toast from 'react-hot-toast';
 import { Plus, Tag, Edit3, Trash2, X, Save } from 'lucide-react';
 
@@ -18,26 +19,27 @@ const TagManager = ({ tags, onRefresh, session }) => {
 
     try {
       setLoading(true);
-      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 
-      const method = editingTag ? 'PUT' : 'POST';
-      const url = editingTag 
-        ? `${BACKEND_URL}/api/tags/${editingTag.id}`
-        : `${BACKEND_URL}/api/tags`;
+      if (editingTag) {
+        // Update existing tag
+        const { error } = await supabase
+          .from('tags')
+          .update({ name: tagName.trim() })
+          .eq('id', editingTag.id);
 
-      const response = await fetch(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ name: tagName })
-      });
+        if (error) throw error;
+        toast.success('Tag updated successfully');
+      } else {
+        // Create new tag
+        const { data, error } = await supabase
+          .from('tags')
+          .insert([{ name: tagName.trim() }])
+          .select();
 
-      if (!response.ok) {
-        throw new Error(`Failed to ${editingTag ? 'update' : 'create'} tag`);
+        if (error) throw error;
+        toast.success('Tag created successfully');
       }
 
-      toast.success(`Tag ${editingTag ? 'updated' : 'created'} successfully`);
       setTagName('');
       setShowForm(false);
       setEditingTag(null);
@@ -62,18 +64,12 @@ const TagManager = ({ tags, onRefresh, session }) => {
     }
 
     try {
-      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+      const { error } = await supabase
+        .from('tags')
+        .delete()
+        .eq('id', tagId);
 
-      const response = await fetch(`${BACKEND_URL}/api/tags/${tagId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete tag');
-      }
+      if (error) throw error;
 
       toast.success('Tag deleted successfully');
       onRefresh();

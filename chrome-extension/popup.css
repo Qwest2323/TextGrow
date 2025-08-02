@@ -480,3 +480,66 @@ body {
 .shortcuts-list::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
 }
+
+/* Modern shortcut action buttons */
+.shortcut-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.shortcut-item:hover .shortcut-actions {
+  opacity: 1;
+}
+
+.shortcut-action {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.copy-btn {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.copy-btn:hover {
+  background: #0369a1;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(3, 105, 161, 0.2);
+}
+
+.edit-btn {
+  background: #f0f9ff;
+  color: #7c3aed;
+  border: 1px solid #e9d5ff;
+}
+
+.edit-btn:hover {
+  background: #7c3aed;
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(124, 58, 237, 0.2);
+}
+
+/* Add icons to buttons */
+.copy-btn:before {
+  content: '📋';
+  font-size: 10px;
+}
+
+.edit-btn:before {
+  content: '✏️';
+  font-size: 10px;
+}

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient';
 import toast from 'react-hot-toast';
 import { 
   Copy, 
@@ -7,12 +8,48 @@ import {
   Folder, 
   Tag as TagIcon,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Plus,
+  X
 } from 'lucide-react';
 
-const ShortcutCard = ({ shortcut, onEdit, onDelete, onCopy }) => {
+const ShortcutCard = ({ shortcut, onEdit, onDelete, onCopy, onRefresh }) => {
   const [expanded, setExpanded] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [showTagSelector, setShowTagSelector] = useState(false);
+  const [availableTags, setAvailableTags] = useState([]);
+  const [updatingTags, setUpdatingTags] = useState(false);
+
+  useEffect(() => {
+    if (showTagSelector) {
+      fetchAvailableTags();
+    }
+  }, [showTagSelector]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showTagSelector && !event.target.closest('.tag-selector-container')) {
+        setShowTagSelector(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showTagSelector]);
+
+  const fetchAvailableTags = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('tags')
+        .select('*')
+        .order('name');
+      
+      if (error) throw error;
+      setAvailableTags(data || []);
+    } catch (error) {
+      console.error('Error fetching tags:', error);
+    }
+  };
 
   const handleCopy = async () => {
     try {
@@ -23,6 +60,82 @@ const ShortcutCard = ({ shortcut, onEdit, onDelete, onCopy }) => {
       toast.success('Copied to clipboard!');
     } catch (error) {
       toast.error('Failed to copy');
+    }
+  };
+
+  const handleAddTag = async (tagId) => {
+    try {
+      setUpdatingTags(true);
+      
+      console.log('Adding tag:', { shortcut_id: shortcut.id, tag_id: tagId });
+      
+      // Check if tag is already added
+      if (shortcut.tags && shortcut.tags.some(tag => tag.id === tagId)) {
+        toast.error('Tag already added to this shortcut');
+        return;
+      }
+
+      // Check if the relationship already exists
+      const { data: existing, error: checkError } = await supabase
+        .from('shortcut_tags')
+        .select('*')
+        .eq('shortcut_id', shortcut.id)
+        .eq('tag_id', tagId);
+
+      if (checkError) {
+        console.error('Error checking existing tag relationship:', checkError);
+        throw checkError;
+      }
+
+      if (existing && existing.length > 0) {
+        toast.error('Tag already added to this shortcut');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('shortcut_tags')
+        .insert([{
+          shortcut_id: shortcut.id,
+          tag_id: tagId
+        }])
+        .select();
+
+      if (error) {
+        console.error('Error inserting tag relationship:', error);
+        throw error;
+      }
+
+      console.log('Tag relationship created:', data);
+      toast.success('Tag added successfully');
+      setShowTagSelector(false);
+      onRefresh();
+    } catch (error) {
+      toast.error(`Failed to add tag: ${error.message}`);
+      console.error('Error adding tag:', error);
+    } finally {
+      setUpdatingTags(false);
+    }
+  };
+
+  const handleRemoveTag = async (tagId) => {
+    try {
+      setUpdatingTags(true);
+
+      const { error } = await supabase
+        .from('shortcut_tags')
+        .delete()
+        .eq('shortcut_id', shortcut.id)
+        .eq('tag_id', tagId);
+
+      if (error) throw error;
+
+      toast.success('Tag removed successfully');
+      onRefresh();
+    } catch (error) {
+      toast.error('Failed to remove tag');
+      console.error('Error removing tag:', error);
+    } finally {
+      setUpdatingTags(false);
     }
   };
 
@@ -39,19 +152,60 @@ const ShortcutCard = ({ shortcut, onEdit, onDelete, onCopy }) => {
           </h3>
           
           {/* Tags */}
-          {shortcut.tags && shortcut.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-3">
-              {shortcut.tags.map((tag) => (
-                <span
-                  key={tag.id}
-                  className="tag"
+          <div className="flex flex-wrap gap-2 mb-3">
+            {shortcut.tags && shortcut.tags.map((tag) => (
+              <span
+                key={tag.id}
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 group"
+              >
+                <TagIcon className="h-3 w-3 mr-1" />
+                {tag.name}
+                <button
+                  onClick={() => handleRemoveTag(tag.id)}
+                  disabled={updatingTags}
+                  className="ml-1 text-blue-600 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                 >
-                  <TagIcon className="h-3 w-3 mr-1" />
-                  {tag.name}
-                </span>
-              ))}
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            ))}
+            
+            {/* Add Tag Button */}
+            <div className="relative tag-selector-container">
+              <button
+                onClick={() => setShowTagSelector(!showTagSelector)}
+                disabled={updatingTags}
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors duration-200"
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Add Tag
+              </button>
+              
+              {/* Tag Selector Dropdown */}
+              {showTagSelector && (
+                <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 min-w-48">
+                  <div className="p-2">
+                    <div className="text-xs font-medium text-gray-700 mb-2">Select a tag to add:</div>
+                    <div className="max-h-32 overflow-y-auto">
+                      {availableTags.filter(tag => !shortcut.tags.some(st => st.id === tag.id)).map((tag) => (
+                        <button
+                          key={tag.id}
+                          onClick={() => handleAddTag(tag.id)}
+                          disabled={updatingTags}
+                          className="w-full text-left px-2 py-1 text-xs hover:bg-gray-100 rounded transition-colors duration-200 disabled:opacity-50"
+                        >
+                          {tag.name}
+                        </button>
+                      ))}
+                      {availableTags.filter(tag => !shortcut.tags.some(st => st.id === tag.id)).length === 0 && (
+                        <div className="text-xs text-gray-500 px-2 py-1">All tags are already added</div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Folders */}
           {shortcut.folders && shortcut.folders.length > 0 && (
@@ -144,20 +298,25 @@ const ShortcutList = ({ shortcuts, onEdit, onRefresh, session }) => {
 
     try {
       setDeletingId(shortcutId);
-      const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-      const token = session?.access_token;
 
-      const response = await fetch(`${BACKEND_URL}/api/shortcuts/${shortcutId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      // First delete associated tag relationships (CASCADE should handle this, but let's be explicit)
+      const { error: tagError } = await supabase
+        .from('shortcut_tags')
+        .delete()
+        .eq('shortcut_id', shortcutId);
 
-      if (!response.ok) {
-        throw new Error('Failed to delete shortcut');
+      if (tagError) {
+        console.warn('Error deleting tag associations:', tagError);
+        // Don't fail the operation for tag deletion errors since CASCADE should handle it
       }
+
+      // Then delete the shortcut
+      const { error } = await supabase
+        .from('shortcuts')
+        .delete()
+        .eq('id', shortcutId);
+
+      if (error) throw error;
 
       toast.success('Shortcut deleted successfully');
       onRefresh();
@@ -210,6 +369,7 @@ const ShortcutList = ({ shortcuts, onEdit, onRefresh, session }) => {
             onEdit={onEdit}
             onDelete={handleDelete}
             onCopy={handleCopy}
+            onRefresh={onRefresh}
           />
         ))}
       </div>

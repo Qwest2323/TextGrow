@@ -239,11 +239,11 @@ async function handleSyncNow(sendResponse) {
   }
 }
 
-// Periodic sync every 5 minutes
+// Periodic sync every 2 minutes
 setInterval(async () => {
   console.log('Performing periodic sync...');
   await syncShortcuts();
-}, 5 * 60 * 1000);
+}, 2 * 60 * 1000);
 
 // Listen for extension startup
 chrome.runtime.onStartup.addListener(async () => {
