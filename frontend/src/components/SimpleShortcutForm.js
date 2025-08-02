@@ -54,6 +54,21 @@ const SimpleShortcutForm = ({ onClose, onSave, session }) => {
       console.log('Shortcut created successfully:', data);
       toast.success('Shortcut created successfully!');
       
+      // Trigger extension sync automatically
+      try {
+        if (window.chrome && window.chrome.runtime) {
+          window.chrome.runtime.sendMessage(window.chrome.runtime.id, {
+            type: 'sync-now'
+          }, (response) => {
+            if (!window.chrome.runtime.lastError) {
+              console.log('Extension auto-synced after shortcut creation');
+            }
+          });
+        }
+      } catch (error) {
+        console.log('Could not auto-sync extension:', error);
+      }
+      
       if (onSave) {
         onSave(data[0]);
       }

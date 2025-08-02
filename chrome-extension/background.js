@@ -18,7 +18,7 @@ const STORAGE_KEYS = {
 const DEFAULT_SETTINGS = {
   enabled: true,
   showDropdown: true,
-  autoExpand: true,
+  autoExpand: false,  // Prefer dropdown selection over auto-expansion
   triggerDelay: 500
 };
 

@@ -1,5 +1,6 @@
 // TextGrow Chrome Extension - Content Script
-console.log('TextGrow content script loaded on:', window.location.hostname);
+console.log('🚀 TextGrow content script loaded on:', window.location.hostname);
+console.log('🚀 TextGrow version: 1.0.0 - Debug Mode');
 
 class TextGrowExpander {
   constructor() {
