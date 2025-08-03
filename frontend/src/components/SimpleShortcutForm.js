@@ -171,20 +171,17 @@ const SimpleShortcutForm = ({ onClose, onSave, session, editingShortcut = null }
       // Trigger extension sync automatically
       try {
         if (window.chrome && window.chrome.runtime) {
-          // Clear extension cache first, then sync
+          // Direct sync without clearing cache to avoid JWT issues
           window.chrome.runtime.sendMessage({
-            type: 'clear-cache'
-          }, () => {
-            // Then trigger sync
-            window.chrome.runtime.sendMessage({
-              type: 'sync-now'
-            }, (response) => {
-              if (window.chrome.runtime.lastError) {
-                console.log('Extension sync failed:', window.chrome.runtime.lastError.message);
-              } else {
-                console.log('Extension auto-synced after shortcut operation');
-              }
-            });
+            type: 'sync-now'
+          }, (response) => {
+            if (window.chrome.runtime.lastError) {
+              console.log('Extension sync failed:', window.chrome.runtime.lastError.message);
+            } else if (response && response.error) {
+              console.log('Extension sync error:', response.error);
+            } else {
+              console.log('Extension auto-synced after shortcut operation');
+            }
           });
         }
       } catch (error) {

@@ -28,6 +28,14 @@ class TextGrowPopup {
             this.updateUI();
           });
         }
+        
+        // Handle auth errors
+        if (changes.auth_error) {
+          console.log('Auth error detected:', changes.auth_error.newValue);
+          this.showTemporaryStatus(changes.auth_error.newValue, 'error');
+          // Clear the error after showing it
+          chrome.storage.local.remove('auth_error');
+        }
       }
     });
   }
@@ -346,13 +354,13 @@ class TextGrowPopup {
       
       console.log('Manual sync triggered');
       
-      // Clear local cache first
-      await chrome.storage.local.remove('textgrow_shortcuts');
-      console.log('Cleared local shortcuts cache');
+      // Trigger background sync directly
+      const syncResult = await this.sendMessage('sync-now');
+      console.log('Background sync triggered, result:', syncResult);
       
-      // Trigger background sync
-      await this.sendMessage('sync-now');
-      console.log('Background sync triggered');
+      if (syncResult && syncResult.error) {
+        throw new Error(syncResult.error);
+      }
       
       // Wait a moment for sync to complete
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -365,7 +373,7 @@ class TextGrowPopup {
       this.showTemporaryStatus('Shortcuts synced successfully');
     } catch (error) {
       console.error('Error syncing:', error);
-      this.showTemporaryStatus('Sync failed', 'error');
+      this.showTemporaryStatus('Sync failed: ' + error.message, 'error');
     }
   }
   

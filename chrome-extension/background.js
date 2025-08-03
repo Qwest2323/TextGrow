@@ -52,14 +52,28 @@ async function syncShortcuts() {
       return;
     }
     
-    // Get user ID from token to filter shortcuts
+    // Check if token is expired
     let userId = null;
+    let tokenExpired = false;
     try {
       const tokenPayload = JSON.parse(atob(userToken.split('.')[1]));
       userId = tokenPayload.sub;
+      const currentTime = Math.floor(Date.now() / 1000);
+      tokenExpired = tokenPayload.exp && tokenPayload.exp < currentTime;
+      
       console.log('User ID from token:', userId);
+      console.log('Token expires at:', new Date(tokenPayload.exp * 1000));
+      console.log('Token expired:', tokenExpired);
+      
+      if (tokenExpired) {
+        console.log('Token is expired, clearing stored token and skipping sync');
+        await chrome.storage.local.remove(STORAGE_KEYS.USER_TOKEN);
+        await chrome.storage.local.remove(STORAGE_KEYS.SHORTCUTS);
+        return;
+      }
     } catch (error) {
       console.error('Error decoding token:', error);
+      return;
     }
 
     // Use Supabase REST API with text_grow schema - filter by user
@@ -122,6 +136,20 @@ async function syncShortcuts() {
       });
     } else {
       console.error('❌ Failed to sync shortcuts. Status:', response.status);
+      
+      // Handle 401 Unauthorized (expired token)
+      if (response.status === 401) {
+        console.log('Received 401 Unauthorized, clearing expired token');
+        await chrome.storage.local.remove(STORAGE_KEYS.USER_TOKEN);
+        await chrome.storage.local.remove(STORAGE_KEYS.SHORTCUTS);
+        
+        // Notify popup to refresh its auth state
+        await chrome.storage.local.set({
+          'force_popup_refresh': Date.now(),
+          'auth_error': 'Token expired - please sign in again'
+        });
+        return;
+      }
       
       // Try to get error details
       try {
