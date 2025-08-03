@@ -227,7 +227,7 @@ const SimpleShortcutForm = ({ onClose, onSave, session, editingShortcut = null }
               value={formData.trigger}
               onChange={handleInputChange}
               placeholder="e.g., @email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               required
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -245,7 +245,7 @@ const SimpleShortcutForm = ({ onClose, onSave, session, editingShortcut = null }
               onChange={handleInputChange}
               placeholder="e.g., john.doe@example.com"
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               required
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -263,7 +263,7 @@ const SimpleShortcutForm = ({ onClose, onSave, session, editingShortcut = null }
               name="folder_id"
               value={formData.folder_id}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
               <option value="">No folder</option>
               {folders.map((folder) => (
@@ -289,7 +289,7 @@ const SimpleShortcutForm = ({ onClose, onSave, session, editingShortcut = null }
                     onClick={() => handleTagToggle(tag.id)}
                     className={`px-3 py-1 rounded-full text-xs font-medium transition-colors duration-200 ${
                       formData.selectedTags.includes(tag.id)
-                        ? 'bg-blue-100 text-blue-800 border-2 border-blue-300'
+                        ? 'bg-primary-100 text-primary-800 border-2 border-primary-300'
                         : 'bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200'
                     }`}
                   >
@@ -316,7 +316,7 @@ const SimpleShortcutForm = ({ onClose, onSave, session, editingShortcut = null }
             <button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center justify-center disabled:opacity-50"
+              className="flex-1 btn-primary disabled:opacity-50"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>

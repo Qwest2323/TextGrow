@@ -2,17 +2,17 @@
   <!-- Background circle with gradient -->
   <defs>
     <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#1D4ED8;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#8151a8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#602E92;stop-opacity:1" />
     </linearGradient>
     <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#E5E7EB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E4EA6F;stop-opacity:0.9" />
     </linearGradient>
   </defs>
   
   <!-- Background circle -->
-  <circle cx="64" cy="64" r="58" fill="url(#bgGradient)" stroke="#1E40AF" stroke-width="2"/>
+  <circle cx="64" cy="64" r="58" fill="url(#bgGradient)" stroke="#4e2571" stroke-width="2"/>
   
   <!-- Text expansion symbol (arrow with lines) -->
   <g transform="translate(32, 45)">

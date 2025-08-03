@@ -336,7 +336,7 @@ const Dashboard = ({ session }) => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your shortcuts...</p>
         </div>
       </div>
@@ -376,7 +376,7 @@ const Dashboard = ({ session }) => {
                 to={item.path}
                 className={`flex items-center px-3 py-2 rounded-lg transition-colors duration-200 ${
                   location.pathname === item.path
-                    ? 'bg-blue-100 text-blue-700'
+                    ? 'bg-primary-100 text-primary-700'
                     : 'text-gray-700 hover:bg-gray-100'
                 }`}
               >
@@ -415,7 +415,7 @@ const Dashboard = ({ session }) => {
                   </button>
                   <button
                     onClick={copyExtensionToken}
-                    className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                    className="text-xs text-primary-600 hover:text-primary-700 font-medium"
                   >
                     📱 Copy Extension Token
                   </button>
@@ -465,22 +465,22 @@ const Dashboard = ({ session }) => {
             <div className="mt-4 flex items-center space-x-2">
               <span className="text-sm text-gray-600">Filters:</span>
               {selectedFolder && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary-100 text-primary-800">
                   Folder: {folders.find(f => f.id === selectedFolder)?.name}
                   <button
                     onClick={() => setSelectedFolder(null)}
-                    className="ml-2 text-blue-600 hover:text-blue-800"
+                    className="ml-2 text-primary-600 hover:text-primary-800"
                   >
                     ×
                   </button>
                 </span>
               )}
               {selectedTag && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800">
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-accent-100 text-accent-800">
                   Tag: {tags.find(t => t.id === selectedTag)?.name}
                   <button
                     onClick={() => setSelectedTag(null)}
-                    className="ml-2 text-green-600 hover:text-green-800"
+                    className="ml-2 text-accent-600 hover:text-accent-800"
                   >
                     ×
                   </button>

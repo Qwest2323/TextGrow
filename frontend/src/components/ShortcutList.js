@@ -156,14 +156,14 @@ const ShortcutCard = ({ shortcut, onEdit, onDelete, onCopy, onRefresh }) => {
             {shortcut.tags && shortcut.tags.map((tag) => (
               <span
                 key={tag.id}
-                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 group"
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 group"
               >
                 <TagIcon className="h-3 w-3 mr-1" />
                 {tag.name}
                 <button
                   onClick={() => handleRemoveTag(tag.id)}
                   disabled={updatingTags}
-                  className="ml-1 text-blue-600 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  className="ml-1 text-primary-600 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -228,8 +228,8 @@ const ShortcutCard = ({ shortcut, onEdit, onDelete, onCopy, onRefresh }) => {
             onClick={handleCopy}
             className={`p-2 rounded-lg transition-all duration-200 ${
               copySuccess 
-                ? 'bg-green-500 text-white' 
-                : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                ? 'bg-accent-500 text-gray-900' 
+                : 'bg-primary-50 text-primary-600 hover:bg-primary-100'
             }`}
           >
             <Copy className="h-4 w-4" />
@@ -258,7 +258,7 @@ const ShortcutCard = ({ shortcut, onEdit, onDelete, onCopy, onRefresh }) => {
         {shortcut.content.length > 300 && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="mt-2 flex items-center text-blue-600 hover:text-blue-700 text-sm"
+            className="mt-2 flex items-center text-primary-600 hover:text-primary-700 text-sm"
           >
             {expanded ? (
               <>
