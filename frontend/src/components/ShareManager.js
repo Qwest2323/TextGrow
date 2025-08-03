@@ -146,7 +146,7 @@ const ShareManager = ({ session }) => {
   if (loading) {
     return (
       <div className="text-center py-12">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{borderColor: '#602E92', borderTopColor: 'transparent'}}></div>
         <p className="text-gray-600">Loading data...</p>
       </div>
     );
@@ -162,8 +162,8 @@ const ShareManager = ({ session }) => {
       <div className="grid gap-4 md:grid-cols-3 mb-8">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center">
-            <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-              <FileText className="h-5 w-5 text-blue-600" />
+            <div className="h-10 w-10 rounded-lg flex items-center justify-center mr-3" style={{backgroundColor: '#f4f1f8'}}>
+              <FileText className="h-5 w-5" style={{color: '#602E92'}} />
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900">{shortcuts.length}</p>
@@ -201,8 +201,8 @@ const ShareManager = ({ session }) => {
         {/* Export */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center mb-4">
-            <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-              <Download className="h-5 w-5 text-blue-600" />
+            <div className="h-10 w-10 rounded-lg flex items-center justify-center mr-3" style={{backgroundColor: '#f4f1f8'}}>
+              <Download className="h-5 w-5" style={{color: '#602E92'}} />
             </div>
             <div>
               <h3 className="text-lg font-medium text-gray-900">Export Shortcuts</h3>
@@ -211,8 +211,8 @@ const ShareManager = ({ session }) => {
           </div>
 
           <div className="space-y-4">
-            <div className="p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800">
+            <div className="p-4 rounded-lg" style={{backgroundColor: '#f4f1f8'}}>
+              <p className="text-sm" style={{color: '#602E92'}}>
                 Export includes all your shortcuts and folders. You can import this file later 
                 or share it with others to transfer shortcuts between accounts.
               </p>
@@ -290,7 +290,8 @@ const ShareManager = ({ session }) => {
                   onChange={(e) => setImportData(e.target.value)}
                   placeholder="Paste the exported JSON data here..."
                   rows={6}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent resize-none"
+                  style={{"--tw-ring-color": "#602E92"}}
                 />
               </div>
               <div className="flex items-center justify-end space-x-3">

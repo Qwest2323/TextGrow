@@ -69,10 +69,10 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8">
         <div className="text-center mb-8">
-          <div className="mx-auto h-12 w-12 bg-blue-600 rounded-lg flex items-center justify-center mb-4">
+          <div className="mx-auto h-12 w-12 rounded-lg flex items-center justify-center mb-4" style={{backgroundColor: '#602E92'}}>
             <span className="text-white font-bold text-xl">TG</span>
           </div>
           <h1 className="text-2xl font-bold text-gray-900">TextGrow</h1>
@@ -94,7 +94,8 @@ const Auth = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                  style={{"--tw-ring-color": "#602E92"}}
                   placeholder="Enter your full name"
                   required
                 />
@@ -113,7 +114,8 @@ const Auth = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                  style={{"--tw-ring-color": "#602E92"}}
                 placeholder="Enter your email"
                 required
               />
@@ -131,7 +133,8 @@ const Auth = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleInputChange}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                  style={{"--tw-ring-color": "#602E92"}}
                 placeholder="Enter your password"
                 required
                 minLength="6"
@@ -142,7 +145,8 @@ const Auth = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full py-2 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{backgroundColor: '#602E92', color: '#E4EA6F'}}
           >
             {loading ? (
               <div className="flex items-center justify-center">
@@ -184,7 +188,8 @@ const Auth = () => {
         <div className="mt-6 text-center">
           <button
             onClick={() => setIsSignUp(!isSignUp)}
-            className="text-sm text-blue-600 hover:text-blue-700 transition-colors duration-200"
+            className="text-sm transition-colors duration-200"
+            style={{color: '#602E92'}}
           >
             {isSignUp 
               ? 'Already have an account? Sign in' 

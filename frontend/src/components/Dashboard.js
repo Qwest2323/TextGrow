@@ -352,8 +352,8 @@ const Dashboard = ({ session }) => {
           <div className="flex items-center justify-between">
             {sidebarOpen && (
               <div className="flex items-center">
-                <div className="h-8 w-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3">
-                  <span className="text-white font-bold">TG</span>
+                <div className="h-8 w-8 rounded-lg flex items-center justify-center mr-3" style={{backgroundColor: '#602E92'}}>
+                  <span className="font-bold" style={{color: '#E4EA6F'}}>TG</span>
                 </div>
                 <h1 className="text-lg font-semibold text-gray-900">TextGrow</h1>
               </div>
@@ -440,7 +440,8 @@ const Dashboard = ({ session }) => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                  style={{"--tw-ring-color": "#602E92"}}
                 />
               </div>
               <button

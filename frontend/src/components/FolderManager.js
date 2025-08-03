@@ -153,7 +153,8 @@ const FolderManager = ({ folders, onRefresh, session }) => {
                 value={folderName}
                 onChange={(e) => setFolderName(e.target.value)}
                 placeholder="Enter folder name"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                style={{"--tw-ring-color": "#602E92"}}
                 required
               />
             </div>

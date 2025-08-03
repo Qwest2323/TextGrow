@@ -40,7 +40,7 @@ body {
   width: 28px;
   height: 28px;
   background: #602E92;
-  color: white;
+  color: #E4EA6F;
   border-radius: 6px;
   display: flex;
   align-items: center;
@@ -414,11 +414,12 @@ body {
 
 .btn-primary {
   background: #602E92;
-  color: white;
+  color: #E4EA6F;
 }
 
 .btn-primary:hover {
   background: #5c2c87;
+  color: #E4EA6F;
 }
 
 .btn-secondary {

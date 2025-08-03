@@ -186,7 +186,8 @@ const ShortcutForm = ({ shortcut, folders, tags, onClose, onSave, session }) => 
               value={formData.trigger}
               onChange={handleInputChange}
               placeholder="e.g., @email, :signature, /address"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+              style={{"--tw-ring-color": "#602E92"}}
               required
             />
             <p className="mt-1 text-xs text-gray-500">
@@ -205,7 +206,8 @@ const ShortcutForm = ({ shortcut, folders, tags, onClose, onSave, session }) => 
               onChange={handleInputChange}
               placeholder="Enter the text that will replace your trigger..."
               rows={8}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent resize-none"
+              style={{"--tw-ring-color": "#602E92"}}
               required
             />
             <p className="mt-1 text-xs text-gray-500">
@@ -222,7 +224,8 @@ const ShortcutForm = ({ shortcut, folders, tags, onClose, onSave, session }) => 
               <button
                 type="button"
                 onClick={() => setShowNewFolderInput(true)}
-                className="text-sm text-blue-600 hover:text-blue-700"
+                className="text-sm"
+                style={{color: '#602E92'}}
               >
                 + New Folder
               </button>
@@ -240,7 +243,8 @@ const ShortcutForm = ({ shortcut, folders, tags, onClose, onSave, session }) => 
                 <button
                   type="button"
                   onClick={handleCreateFolder}
-                  className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+                  className="px-3 py-2 rounded-lg text-sm"
+                  style={{backgroundColor: '#602E92', color: '#E4EA6F'}}
                 >
                   Add
                 </button>
@@ -267,7 +271,8 @@ const ShortcutForm = ({ shortcut, folders, tags, onClose, onSave, session }) => 
                     type="checkbox"
                     checked={formData.selectedFolders.includes(folder.id)}
                     onChange={() => handleFolderToggle(folder.id)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-gray-300"
+                    style={{color: '#602E92', "--tw-ring-color": "#602E92"}}
                   />
                   <Folder className="h-4 w-4 text-purple-600" />
                   <span className="text-sm text-gray-700">{folder.name}</span>
@@ -285,7 +290,8 @@ const ShortcutForm = ({ shortcut, folders, tags, onClose, onSave, session }) => 
               <button
                 type="button"
                 onClick={() => setShowNewTagInput(true)}
-                className="text-sm text-blue-600 hover:text-blue-700"
+                className="text-sm"
+                style={{color: '#602E92'}}
               >
                 + New Tag
               </button>
@@ -303,7 +309,8 @@ const ShortcutForm = ({ shortcut, folders, tags, onClose, onSave, session }) => 
                 <button
                   type="button"
                   onClick={handleCreateTag}
-                  className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+                  className="px-3 py-2 rounded-lg text-sm"
+                  style={{backgroundColor: '#602E92', color: '#E4EA6F'}}
                 >
                   Add
                 </button>
@@ -330,9 +337,10 @@ const ShortcutForm = ({ shortcut, folders, tags, onClose, onSave, session }) => 
                     type="checkbox"
                     checked={formData.selectedTags.includes(tag.id)}
                     onChange={() => handleTagToggle(tag.id)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-gray-300"
+                    style={{color: '#602E92', "--tw-ring-color": "#602E92"}}
                   />
-                  <TagIcon className="h-4 w-4 text-blue-600" />
+                  <TagIcon className="h-4 w-4" style={{color: '#602E92'}} />
                   <span className="text-sm text-gray-700">{tag.name}</span>
                 </label>
               ))}

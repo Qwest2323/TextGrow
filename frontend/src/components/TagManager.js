@@ -116,7 +116,8 @@ const TagManager = ({ tags, onRefresh, session }) => {
                 value={tagName}
                 onChange={(e) => setTagName(e.target.value)}
                 placeholder="Enter tag name"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                style={{"--tw-ring-color": "#602E92"}}
                 required
               />
             </div>
@@ -166,8 +167,8 @@ const TagManager = ({ tags, onRefresh, session }) => {
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center">
-                  <div className="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                    <Tag className="h-4 w-4 text-blue-600" />
+                  <div className="h-8 w-8 rounded-lg flex items-center justify-center mr-3" style={{backgroundColor: '#f4f1f8'}}>
+                    <Tag className="h-4 w-4" style={{color: '#602E92'}} />
                   </div>
                   <div>
                     <h3 className="font-medium text-gray-900">{tag.name}</h3>

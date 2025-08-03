@@ -19,7 +19,14 @@ code {
 /* TextGrow Custom Button Classes */
 @layer components {
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center;
+    background-color: #602E92 !important;
+    color: #E4EA6F !important;
+    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center;
+  }
+  
+  .btn-primary:hover {
+    background-color: #4e2571 !important;
+    color: #E4EA6F !important;
   }
   
   .btn-secondary {
@@ -27,14 +34,27 @@ code {
   }
   
   .btn-accent {
-    @apply bg-accent-500 hover:bg-accent-600 text-gray-900 px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+    background-color: #E4EA6F !important;
+    color: #602E92 !important;
+    @apply px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+  }
+  
+  .btn-accent:hover {
+    background-color: #d4d058 !important;
+    color: #602E92 !important;
   }
   
   .tag-primary {
-    @apply bg-primary-100 text-primary-800 border border-primary-200;
+    background-color: #f4f1f8 !important;
+    color: #602E92 !important;
+    border-color: #d6c8e5 !important;
+    @apply border rounded-full;
   }
   
   .tag-accent {
-    @apply bg-accent-100 text-accent-800 border border-accent-200;
+    background-color: #fefce8 !important;
+    color: #706b35 !important;
+    border-color: #fef08a !important;
+    @apply border rounded-full;
   }
 }
