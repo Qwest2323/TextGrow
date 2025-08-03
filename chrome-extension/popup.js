@@ -14,7 +14,22 @@ class TextGrowPopup {
   async init() {
     await this.loadData();
     this.setupEventListeners();
+    this.setupStorageListener();
     this.updateUI();
+  }
+  
+  setupStorageListener() {
+    // Listen for storage changes (shortcuts updates)
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+      if (namespace === 'local') {
+        if (changes.textgrow_shortcuts || changes.force_popup_refresh) {
+          console.log('Shortcuts updated, refreshing popup');
+          this.loadData().then(() => {
+            this.updateUI();
+          });
+        }
+      }
+    });
   }
   
   async loadData() {
@@ -329,10 +344,24 @@ class TextGrowPopup {
       if (statusDot) statusDot.className = 'status-dot syncing';
       if (statusText) statusText.textContent = 'Syncing...';
       
+      console.log('Manual sync triggered');
+      
+      // Clear local cache first
+      await chrome.storage.local.remove('textgrow_shortcuts');
+      console.log('Cleared local shortcuts cache');
+      
+      // Trigger background sync
       await this.sendMessage('sync-now');
+      console.log('Background sync triggered');
+      
+      // Wait a moment for sync to complete
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Reload data
       await this.loadData();
       this.updateUI();
       
+      console.log('Sync completed, shortcuts updated:', this.shortcuts.length);
       this.showTemporaryStatus('Shortcuts synced successfully');
     } catch (error) {
       console.error('Error syncing:', error);

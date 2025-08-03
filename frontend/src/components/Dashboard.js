@@ -76,7 +76,7 @@ const Dashboard = ({ session }) => {
         throw error;
       }
 
-      // Now fetch tags for each shortcut using the junction table
+      // Now fetch tags and folder info for each shortcut
       let transformedShortcuts = [];
       
       for (const shortcut of data || []) {
@@ -91,13 +91,31 @@ const Dashboard = ({ session }) => {
 
           const tags = tagError ? [] : (tagData?.map(st => st.tags).filter(Boolean) || []);
           
+          // Fetch folder info if folder_id exists
+          let folderInfo = null;
+          if (shortcut.folder_id) {
+            try {
+              const { data: folderData, error: folderError } = await supabase
+                .from('folders')
+                .select('id, name')
+                .eq('id', shortcut.folder_id)
+                .single();
+              
+              if (!folderError) {
+                folderInfo = folderData;
+              }
+            } catch (folderErr) {
+              console.warn('Error fetching folder info:', folderErr);
+            }
+          }
+          
           transformedShortcuts.push({
             ...shortcut,
-            folders: [], // For now, don't try to fetch folder relationships
+            folders: folderInfo ? [folderInfo] : [],
             tags: tags
           });
         } catch (err) {
-          // If tag fetching fails, just add the shortcut without tags
+          // If fetching fails, just add the shortcut without tags/folders
           transformedShortcuts.push({
             ...shortcut,
             folders: [],

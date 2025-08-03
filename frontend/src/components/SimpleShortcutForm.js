@@ -7,13 +7,15 @@ const SimpleShortcutForm = ({ onClose, onSave, session, editingShortcut = null }
   const [formData, setFormData] = useState({
     trigger: '',
     content: '',
+    folder_id: '',
     selectedTags: []
   });
+  const [folders, setFolders] = useState([]);
   const [tags, setTags] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchTags();
+    fetchFoldersAndTags();
   }, []);
 
   useEffect(() => {
@@ -21,13 +23,24 @@ const SimpleShortcutForm = ({ onClose, onSave, session, editingShortcut = null }
       setFormData({
         trigger: editingShortcut.trigger || '',
         content: editingShortcut.content || '',
+        folder_id: editingShortcut.folder_id || '',
         selectedTags: editingShortcut.tags?.map(tag => tag.id) || []
       });
     }
   }, [editingShortcut]);
 
-  const fetchTags = async () => {
+  const fetchFoldersAndTags = async () => {
     try {
+      // Fetch folders
+      const { data: foldersData, error: foldersError } = await supabase
+        .from('folders')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('name', { ascending: true });
+
+      if (foldersError) throw foldersError;
+      setFolders(foldersData || []);
+
       // Fetch tags
       const { data: tagsData, error: tagsError } = await supabase
         .from('tags')
@@ -37,7 +50,7 @@ const SimpleShortcutForm = ({ onClose, onSave, session, editingShortcut = null }
       if (tagsError) throw tagsError;
       setTags(tagsData || []);
     } catch (error) {
-      console.error('Error fetching tags:', error);
+      console.error('Error fetching folders and tags:', error);
     }
   };
 
@@ -76,7 +89,8 @@ const SimpleShortcutForm = ({ onClose, onSave, session, editingShortcut = null }
       const shortcutData = {
         trigger: formData.trigger.trim(),
         content: formData.content.trim(),
-        user_id: session.user.id
+        user_id: session.user.id,
+        folder_id: formData.folder_id || null
       };
 
       let shortcutId;
@@ -157,12 +171,20 @@ const SimpleShortcutForm = ({ onClose, onSave, session, editingShortcut = null }
       // Trigger extension sync automatically
       try {
         if (window.chrome && window.chrome.runtime) {
-          window.chrome.runtime.sendMessage(window.chrome.runtime.id, {
-            type: 'sync-now'
-          }, (response) => {
-            if (!window.chrome.runtime.lastError) {
-              console.log('Extension auto-synced after shortcut creation');
-            }
+          // Clear extension cache first, then sync
+          window.chrome.runtime.sendMessage({
+            type: 'clear-cache'
+          }, () => {
+            // Then trigger sync
+            window.chrome.runtime.sendMessage({
+              type: 'sync-now'
+            }, (response) => {
+              if (window.chrome.runtime.lastError) {
+                console.log('Extension sync failed:', window.chrome.runtime.lastError.message);
+              } else {
+                console.log('Extension auto-synced after shortcut operation');
+              }
+            });
           });
         }
       } catch (error) {
@@ -234,6 +256,26 @@ const SimpleShortcutForm = ({ onClose, onSave, session, editingShortcut = null }
             </p>
           </div>
 
+          {/* Folder Selection */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              <Folder className="h-4 w-4 inline mr-1" />
+              Folder (Optional)
+            </label>
+            <select
+              name="folder_id"
+              value={formData.folder_id}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">No folder</option>
+              {folders.map((folder) => (
+                <option key={folder.id} value={folder.id}>
+                  {folder.name}
+                </option>
+              ))}
+            </select>
+          </div>
 
           {/* Tag Selection */}
           {tags.length > 0 && (

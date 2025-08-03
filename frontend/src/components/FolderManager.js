@@ -1,13 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import toast from 'react-hot-toast';
-import { Plus, Folder, Edit3, Trash2, X, Save } from 'lucide-react';
+import { Plus, Folder, Edit3, Trash2, X, Save, FileText } from 'lucide-react';
 
 const FolderManager = ({ folders, onRefresh, session }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingFolder, setEditingFolder] = useState(null);
   const [folderName, setFolderName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [folderShortcuts, setFolderShortcuts] = useState({});
+
+  useEffect(() => {
+    fetchShortcutsForFolders();
+  }, [folders]);
+
+  const fetchShortcutsForFolders = async () => {
+    if (!session?.user?.id || !folders.length) return;
+
+    try {
+      const shortcutCounts = {};
+      
+      for (const folder of folders) {
+        const { data, error } = await supabase
+          .from('shortcuts')
+          .select('id, trigger')
+          .eq('user_id', session.user.id)
+          .eq('folder_id', folder.id);
+
+        if (!error) {
+          shortcutCounts[folder.id] = data || [];
+        }
+      }
+      
+      setFolderShortcuts(shortcutCounts);
+    } catch (error) {
+      console.error('Error fetching folder shortcuts:', error);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -167,40 +196,74 @@ const FolderManager = ({ folders, onRefresh, session }) => {
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {folders.map((folder) => (
-            <div
-              key={folder.id}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200"
-            >
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center">
-                  <div className="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                    <Folder className="h-5 w-5 text-purple-600" />
+          {folders.map((folder) => {
+            const shortcuts = folderShortcuts[folder.id] || [];
+            return (
+              <div
+                key={folder.id}
+                className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200"
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center">
+                    <div className="h-10 w-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                      <Folder className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-gray-900">{folder.name}</h3>
+                      <p className="text-sm text-gray-500">
+                        Created {new Date(folder.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">{folder.name}</h3>
-                    <p className="text-sm text-gray-500">
-                      Created {new Date(folder.created_at).toLocaleDateString()}
-                    </p>
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => handleEdit(folder)}
+                      className="p-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors duration-200"
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(folder.id)}
+                      className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors duration-200"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => handleEdit(folder)}
-                    className="p-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors duration-200"
-                  >
-                    <Edit3 className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(folder.id)}
-                    className="p-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors duration-200"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+
+                {/* Shortcut count and list */}
+                <div className="border-t border-gray-200 pt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center text-sm text-gray-600">
+                      <FileText className="h-4 w-4 mr-1" />
+                      {shortcuts.length} shortcut{shortcuts.length !== 1 ? 's' : ''}
+                    </div>
+                  </div>
+                  
+                  {shortcuts.length > 0 && (
+                    <div className="space-y-1">
+                      {shortcuts.slice(0, 3).map((shortcut) => (
+                        <div key={shortcut.id} className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
+                          {shortcut.trigger}
+                        </div>
+                      ))}
+                      {shortcuts.length > 3 && (
+                        <div className="text-xs text-gray-400">
+                          +{shortcuts.length - 3} more...
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  
+                  {shortcuts.length === 0 && (
+                    <p className="text-xs text-gray-400 italic">
+                      No shortcuts in this folder yet. Create a shortcut and assign it to this folder.
+                    </p>
+                  )}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

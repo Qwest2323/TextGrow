@@ -101,6 +101,9 @@ async function syncShortcuts() {
         updated_at: shortcut.updated_at
       }));
       
+      // Clear old shortcuts first to ensure clean update
+      await chrome.storage.local.remove(STORAGE_KEYS.SHORTCUTS);
+      
       // Store shortcuts locally
       await chrome.storage.local.set({
         [STORAGE_KEYS.SHORTCUTS]: formattedShortcuts,
@@ -108,9 +111,15 @@ async function syncShortcuts() {
       });
       
       console.log(`✅ Synced ${formattedShortcuts.length} shortcuts successfully`);
+      console.log('Updated shortcuts:', formattedShortcuts);
       
       // Notify content scripts about update
       notifyContentScripts('shortcuts-updated', formattedShortcuts);
+      
+      // Force popup refresh by setting a flag
+      await chrome.storage.local.set({
+        'force_popup_refresh': Date.now()
+      });
     } else {
       console.error('❌ Failed to sync shortcuts. Status:', response.status);
       
@@ -166,6 +175,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       
     case 'sync-now':
       handleSyncNow(sendResponse);
+      return true;
+      
+    case 'clear-cache':
+      handleClearCache(sendResponse);
       return true;
       
     default:
@@ -235,6 +248,19 @@ async function handleSyncNow(sendResponse) {
     sendResponse({ success: true });
   } catch (error) {
     console.error('Error during manual sync:', error);
+    sendResponse({ error: error.message });
+  }
+}
+
+async function handleClearCache(sendResponse) {
+  try {
+    console.log('Clearing shortcuts cache...');
+    await chrome.storage.local.remove(STORAGE_KEYS.SHORTCUTS);
+    await chrome.storage.local.remove('force_popup_refresh');
+    console.log('Cache cleared successfully');
+    sendResponse({ success: true });
+  } catch (error) {
+    console.error('Error clearing cache:', error);
     sendResponse({ error: error.message });
   }
 }
