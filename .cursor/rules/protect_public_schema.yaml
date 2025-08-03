@@ -1,0 +1,15 @@
+# .cursor/rules/protect_public_schema.yaml
+
+# Block any SQL or migrations that touch the public schema
+- rule: block_sql_on_public
+  description: |
+    Prevent any migration or SQL snippet from modifying tables in the 'public' schema.
+  match:
+    path: "**/*.sql"        # any SQL file
+  guard:
+    contains:
+      - "public."
+  action: reject
+  message: |
+    🚫 Detected reference to the `public` schema. 
+    All DB changes must target the `text_grow` schema only.

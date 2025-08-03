@@ -39,6 +39,23 @@ const Dashboard = ({ session }) => {
     fetchData();
   }, []);
 
+  // Handle edit parameter from URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const editId = urlParams.get('edit');
+    
+    if (editId && shortcuts.length > 0) {
+      const shortcutToEdit = shortcuts.find(s => s.id === editId);
+      if (shortcutToEdit) {
+        console.log('Found shortcut to edit from URL:', shortcutToEdit);
+        setEditingShortcut(shortcutToEdit);
+        setShowShortcutForm(true);
+        // Clear the URL parameter after handling it
+        navigate(location.pathname, { replace: true });
+      }
+    }
+  }, [location.search, shortcuts, navigate, location.pathname]);
+
   const fetchData = async () => {
     try {
       setLoading(true);

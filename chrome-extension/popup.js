@@ -253,7 +253,7 @@ class TextGrowPopup {
   async handleSignIn() {
     try {
       // Open setup page first, then dashboard
-      const setupUrl = 'http://localhost:3000/extension-setup.html?auto=true';
+      const setupUrl = 'https://text-grow.vercel.app/extension-setup.html?auto=true';
       chrome.tabs.create({ url: setupUrl });
       
       this.showTemporaryStatus('Opening setup page...');
@@ -378,12 +378,12 @@ class TextGrowPopup {
   }
   
   handleAdd() {
-    const dashboardUrl = 'http://localhost:3000';
+    const dashboardUrl = 'https://text-grow.vercel.app';
     chrome.tabs.create({ url: dashboardUrl });
   }
   
   editShortcut(shortcutId) {
-    const dashboardUrl = `http://localhost:3000?edit=${shortcutId}`;
+    const dashboardUrl = `https://text-grow.vercel.app?edit=${shortcutId}`;
     chrome.tabs.create({ url: dashboardUrl });
   }
   
@@ -421,12 +421,12 @@ class TextGrowPopup {
   }
   
   openDashboard() {
-    const dashboardUrl = 'http://localhost:3000';
+    const dashboardUrl = 'https://text-grow.vercel.app';
     chrome.tabs.create({ url: dashboardUrl });
   }
   
   openHelp() {
-    const helpUrl = 'http://localhost:3000/help';
+    const helpUrl = 'https://text-grow.vercel.app/help';
     chrome.tabs.create({ url: helpUrl });
   }
   
